@@ -1,5 +1,4 @@
 //import { sheetDef } from "./Warpstar/sheetDef";
-//import { sheetDef } from "./Warlock/sheetDef";
-import { sheetDef } from "./Verhexte Augen/sheetDef";
+import { sheetDef } from "./Warlock/sheetDef";
 
 export const businessLogicSheetDef = sheetDef;
