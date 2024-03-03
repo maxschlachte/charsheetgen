@@ -1,53 +1,14 @@
-# default
+# Charsheetgen
 
-## Project setup
+## Getting started
+
+The project offers a framework for generating character sheets. As an example the definitions for the character sheets of the Warlock and Warpstar RPG can be found in the `src/businesslogic` directory. The definition is build into a singular html file. The project uses Vue3 and Vite and can be compiled as follows:
 
 ```
-# yarn
-yarn
-
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# bun
-bun install
+npm build
 ```
 
-### Compiles and hot-reloads for development
-
-```
-# yarn
-yarn dev
-
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# bun
-bun run dev
-```
-
-### Compiles and minifies for production
-
-```
-# yarn
-yarn build
-
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# bun
-bun run build
-```
-
-### Customize configuration
+`dist` will now contain the `index.html`.
 
 See [Configuration Reference](https://vitejs.dev/config/).
