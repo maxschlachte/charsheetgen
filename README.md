@@ -6,7 +6,7 @@ The project offers a framework for generating character sheets. As an example th
 
 ```
 npm install
-npm build
+npm run build
 ```
 
 `dist` will now contain the `index.html`.

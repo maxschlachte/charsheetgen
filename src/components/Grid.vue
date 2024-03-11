@@ -8,6 +8,7 @@
                 v-if="isInputNumber(cell) || isInputText(cell)"
                 :model-value="getModelValue(cell)"
                 :label="cell.name"
+                :readonly="String(cell.id).split('-').includes('readonly') ? true : false"
                 hide-details
                 flat
                 variant="outlined"

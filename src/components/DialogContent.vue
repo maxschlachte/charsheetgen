@@ -16,7 +16,7 @@
                 :style="`color:${getColor()};`">
             </p>
           </div>
-          <div>
+          <div style="white-space: pre;">
             {{ getData().text }}
           </div>
         </div>
@@ -102,4 +102,5 @@ const setModelValue = (dialogInput: IDialogInput, event: Event) => {
     console.log("store id " + getDialogInputId(dialogInput) + ": " + (event.target as HTMLButtonElement)?.value);
     useStore().updateLocalValueById(getDialogInputId(dialogInput), (event.target as HTMLButtonElement)?.value);
 }
+
 </script>
