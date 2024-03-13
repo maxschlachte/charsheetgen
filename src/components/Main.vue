@@ -18,7 +18,7 @@
           </div>
         </div>
       </div>
-      <div class="hidden md:block max-w-[1200px]">
+      <div class="hidden md:block max-w-[1200px]" style="width:100%">
         <div id="two-columns" class="grid grid-cols-2 gap-4">
           <div>
             <div v-for="(card, index) in getCards().filter((crd, idx) => crd.colspan != 2 && idx % 2 == 0)"

@@ -3,7 +3,7 @@
     class="primary"
     density="compact"
   >-->
-  <table class="table-auto">
+  <table class="table-fixed" style="width:100%">
     <thead v-if="getTable().column !== undefined">
       <tr>
         <th
@@ -22,7 +22,7 @@
         <td 
           v-for="(cell, idx) in entry"
           :class="`px-2 py-[1px]`"
-        :style="`background:${entryIdx % 2 == 0 ? 'background' : 'secondary'}`"
+          :style="`background:${entryIdx % 2 == 0 ? 'background' : 'secondary'}`"
         >
           <div
             v-if="isText(cell)"
@@ -128,6 +128,11 @@ const getPositioningByIndex = (index: number) => {
 
 <style scoped>
 .v-btn {
-min-width: 0;
+  min-width: 0;
+}
+
+td:first-child div.whitespace-nowrap {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

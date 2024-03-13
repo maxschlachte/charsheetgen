@@ -1,7 +1,7 @@
 import { useStore } from "@/services/store.service";
 import { CELL_TYPES, ELEMENT_TYPES, POSITIONING } from "@/types/enums";
 import { IButton, ICell, IElement, IElementText, IGrid, IInputNumber, IInputText, ISelect, ISheet, ITable, IText, ITextArea } from "@/types/interfaces";
-import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney } from "./utils";
+import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, initializeValue } from "./utils";
 import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills } from "./staticData";
 import { MDI } from "./icons";
 import { getInputIds, trackAll } from "./builder";
@@ -67,27 +67,32 @@ function skillsTable(group: string, properties: string, skills: {name: string; p
     column: [
       {
         name: group,
-        width: "100%",
+        width: "35%",
         position: POSITIONING.LEFT
       },
       {
         name: "",
+        width: "25%",
         position: POSITIONING.CENTER
       },
       {
         name: "BE",
+        width: "10%",
         position: POSITIONING.CENTER
       },
       {
         name: "SF",
+        width: "10%",
         position: POSITIONING.CENTER
       },
       {
         name: (skills == fightSkills ? "KTW" : "FW"),
+        width: "10%",
         position: POSITIONING.CENTER
       },
       {
         name: "",
+        width: "10%",
         position: POSITIONING.CENTER
       }
     ],
@@ -505,20 +510,22 @@ export const sheetDef: ISheet = {
           column: [
             {
               name: "Gegenstand",
-              width: "50%",
+              width: "30%",
               position: POSITIONING.LEFT
             },
             {
               name: "Gewicht",
+              width: "20%",
               position: POSITIONING.CENTER
             },
             {
               name: "Gegenstand",
-              width: "50%",
+              width: "30%",
               position: POSITIONING.LEFT
             },
             {
               name: "Gewicht",
+              width: "20%",
               position: POSITIONING.CENTER
             },
           ],
@@ -622,14 +629,29 @@ export const sheetDef: ISheet = {
   ]
 } as ISheet;
 
-// initialise BE values for all skills
+// initialise "Eigenschaften"
+for(const property of ["MU", "KL", "IN", "CH", "FF", "GE", "KO", "KK"]){
+  initializeValue("id:" + property, 8);
+}
+
+// initialise other stats
+initializeValue("id:LE-max", 21);
+initializeValue("id:SK", -1);
+initializeValue("id:ZK", -1);
+initializeValue("id:GS", 8);
+
+// initialise FW and BE for all skills
 for(const skills of [physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills]){
   for(const skill of skills){
+    const name = skill.name.replaceAll(" ", "_");
+    initializeValue("id:" + name, (skills == fightSkills ? 6 : 0));
     if(skill.be == "ja"){
-      useStore().updateSaveableValueById("id:" + skill.name.replaceAll(" ", "_") + "-BE", "x");
+      initializeValue("id:" + name + "-BE", "x");
     }
   }
 }
+
+trackAll();
 
 // add watchers to all input elements
 const ids = getInputIds(sheetDef);

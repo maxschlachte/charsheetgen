@@ -31,13 +31,11 @@ const groupCosts: { [group: string]: number; } = {"A" : 1, "B" : 2, "C" : 3, "D"
 // calculate the "Steigerungskosten" up to the current value (can be negative if the value is lower than the start value)
 function calcCosts(startValue: number, currentValue: number, group: string){
     let spent_AP = 0;
-    if(currentValue < startValue){
-        spent_AP -= (startValue - currentValue) * groupCosts[group];
+    for(var i = currentValue + 1; i <= startValue; ++i){
+        spent_AP -= groupCosts[group] * (Math.max(0, i - (group == "E" ? 14 : 12)) + 1);
     }
-    else {
-        for(var i = startValue + 1; i <= currentValue; ++i){
-            spent_AP += groupCosts[group] * (Math.max(0, i - (group == "E" ? 14 : 12)) + 1);
-        }
+    for(var i = startValue + 1; i <= currentValue; ++i){
+        spent_AP += groupCosts[group] * (Math.max(0, i - (group == "E" ? 14 : 12)) + 1);
     }
     return spent_AP;
 }

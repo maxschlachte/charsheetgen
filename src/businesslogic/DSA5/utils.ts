@@ -4,6 +4,7 @@ import { INPUT_TYPES } from "@/types/enums";
 import { IDialog} from "@/types/interfaces";
 import colors from "vuetify/lib/util/colors.mjs";
 import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills } from "./staticData";
+import { start } from "repl";
 
 
 // helper function: opens a dialog box to enter a value to do something with
@@ -349,6 +350,12 @@ function getTriple(elementId: string){
     }
   }
   return "";
+}
+
+export const initializeValue = (elementId: string, startValue: any) => {
+  if(useStore().getValueById(elementId, undefined) === undefined){
+    updateValue(elementId, startValue);
+  }
 }
 
 export const updateValue = (elementId: string, newValue: any) => {
