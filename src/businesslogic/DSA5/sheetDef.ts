@@ -25,16 +25,6 @@ function propertyField(id: string, colspan: number = 1){
   };
 }
 
-function propertyStart(id: string, colspan: number = 2){
-  const name = id.replaceAll("-readonly", "");
-  return {
-    id: "id:" + id + "-max",
-    name: name + " (max)",
-    type: CELL_TYPES.INPUT_NUMBER,
-    colspan: colspan
-  };
-}
-
 function propertyCheck(id: string){
   const name = id.replaceAll("-readonly", "");
   return {
@@ -141,6 +131,156 @@ function skillsTable(group: string, properties: string, skills: {name: string; p
     skillsTable.cells.push([nameCell, propertiesCell, beCell, groupCell, valueCell, checkButtonCell])
   }
   return skillsTable;
+}
+
+function magicTable(name: string){
+  const prefix = name.split("/")[0].replaceAll(" ", "_");
+  const magicTable: ITable = {
+    type: ELEMENT_TYPES.TABLE,
+    column: [
+      {
+        name: name,
+        width: "22.5%",
+        position: POSITIONING.LEFT
+      },
+      {
+        name: "Kosten",
+        width: "7.5%",
+        position: POSITIONING.CENTER
+      },
+      {
+        name: prefix + "dauer",
+        width: "12.5%",
+        position: POSITIONING.CENTER
+      },
+      {
+        name: "Reichweite",
+        width: "12.5%",
+        position: POSITIONING.CENTER
+      },
+      {
+        name: "Wirkungsdauer",
+        width: "12.5%",
+        position: POSITIONING.CENTER
+      },
+      {
+        name: "",
+        width: "12.5%",
+        position: POSITIONING.CENTER
+      },
+      {
+        name: "SF",
+        width: "7.5%",
+        position: POSITIONING.CENTER
+      },
+      {
+        name: "FW",
+        width: "7.5%",
+        position: POSITIONING.CENTER
+      },
+      {
+        name: "",
+        width: "5%",
+        position: POSITIONING.CENTER
+      }
+    ],
+    cells: []
+  }
+  for (var i = 1; i <= 40; ++i) {
+    const id = i.toString();
+    const nameCell: ICell = {
+      id: "id:" + prefix + "-name-" + id,
+      name: "",
+      type: CELL_TYPES.INPUT_STRING
+    };
+    const costsCell: ICell = {
+      id: "id:" + prefix + "-costs-" + id,
+      name: "",
+      type: CELL_TYPES.INPUT_NUMBER
+    };
+    const timeCell: ICell = {
+      id: "id:" + prefix + "-time-" + id,
+      name: "",
+      type: CELL_TYPES.INPUT_STRING
+    };
+    const distanceCell: ICell = {
+      id: "id:" + prefix + "-distance-" + id,
+      name: "",
+      type: CELL_TYPES.INPUT_STRING
+    };
+    const durationCell: ICell = {
+      id: "id:" + prefix + "-duration-" + id,
+      name: "",
+      type: CELL_TYPES.INPUT_STRING
+    };
+    const propertiesCell: ICell = {
+      id: "id:" + prefix + "-properties-" + id,
+      name: "Eigenschaften",
+      type: CELL_TYPES.INPUT_STRING
+    };
+    const groupCell: ISelect = {
+      id: "id:" + prefix + "-group-" + id,
+      name: "",
+      type: CELL_TYPES.SELECT,
+      items: ["", "A", "B", "C", "D"],
+      colspan: 1
+    };
+    const valueCell: IInputNumber = {
+      id: "id:" + prefix + "-" + id,
+      name: "FW",
+      type: CELL_TYPES.INPUT_NUMBER,
+      range: [0,20]
+    };
+    const checkButtonCell: IButton = {
+      name: "",
+      type: CELL_TYPES.BUTTON,
+      icon: "mdi-dice-d20-outline",
+      action: () => {
+        chooseModifierAndMakeTripleCheck("id:" + prefix + "-" + id, "Probe: " + name, "id:" + prefix + "-name-" + id);
+      }
+    };
+    magicTable.cells.push([nameCell, costsCell, timeCell, distanceCell, durationCell, propertiesCell, groupCell, valueCell, checkButtonCell])
+  }
+  magicTable.cells.push([
+    {
+      name: "Leiteigenschaft",
+      type: CELL_TYPES.STRING,
+    },
+    {
+      name: "",
+      type: CELL_TYPES.STRING,
+    },
+    {
+      name: "",
+      type: CELL_TYPES.STRING,
+    },
+    {
+      name: "",
+      type: CELL_TYPES.STRING,
+    },
+    {
+      name: "",
+      type: CELL_TYPES.STRING,
+    },
+    {
+      id: "id:" + prefix + "-property",
+      name: "Leiteigenschaft",
+      type: CELL_TYPES.INPUT_STRING,
+    },
+    {
+      name: "",
+      type: CELL_TYPES.STRING,
+    },
+    {
+      name: "",
+      type: CELL_TYPES.STRING,
+    },
+    {
+      name: "",
+      type: CELL_TYPES.STRING,
+    },
+  ]);
+  return magicTable;
 }
 
 function stateRow(i: number, name: string = ""){
@@ -327,30 +467,30 @@ export const sheetDef: ISheet = {
             [
               propertyField("IN"),
               propertyCheck("IN"),
-              propertyStart("LE"),
-              propertyField("LE"),
-              propertyRegen("LE"),
+              propertyField("LE", 2),
+              propertyField("LeP"),
+              propertyRegen("LeP"),
             ],
             [
               propertyField("CH"),
               propertyCheck("CH"),
-              propertyStart("AE"),
-              propertyField("AE"),
-              propertyRegen("AE"),
+              propertyField("AE", 2),
+              propertyField("AeP"),
+              propertyRegen("AeP"),
             ],
             [
               propertyField("FF"),
               propertyCheck("FF"),
-              propertyStart("KE"),
-              propertyField("KE"),
-              propertyRegen("KE"),
+              propertyField("KE", 2),
+              propertyField("KeP"),
+              propertyRegen("KeP"),
             ],
             [
               propertyField("GE"),
               propertyCheck("GE"),
               {
                 id: "id:SK",
-                name: "Seelenkraft",
+                name: "SK",
                 type: CELL_TYPES.INPUT_NUMBER,
                 colspan: 2
               },
@@ -362,7 +502,7 @@ export const sheetDef: ISheet = {
               propertyCheck("KO"),
               {
                 id: "id:ZK",
-                name: "Zähigkeit",
+                name: "ZK",
                 type: CELL_TYPES.INPUT_NUMBER,
                 colspan: 2
               },
@@ -598,6 +738,7 @@ export const sheetDef: ISheet = {
             weaponRow(3),
             weaponRow(4),
             weaponRow(5),
+            weaponRow(6),
           ]
         } as IGrid
       ]
@@ -606,24 +747,14 @@ export const sheetDef: ISheet = {
       headline: "Zauber & Rituale",
       colspan: 2,
       elements: [
-        {
-          type: ELEMENT_TYPES.GRID,
-          cells: [
-            // TODO
-          ]
-        } as IGrid
+        magicTable("Zauber/Ritual"),
       ]
     },
     {
       headline: "Liturgien & Zeremonien",
       colspan: 2,
       elements: [
-        {
-          type: ELEMENT_TYPES.GRID,
-          cells: [
-            // TODO
-          ]
-        } as IGrid
+        magicTable("Liturgie/Zeremonie"),
       ]
     },
   ]
@@ -635,7 +766,7 @@ for(const property of ["MU", "KL", "IN", "CH", "FF", "GE", "KO", "KK"]){
 }
 
 // initialise other stats
-initializeValue("id:LE-max", 21);
+initializeValue("id:LE", 21);
 initializeValue("id:SK", -1);
 initializeValue("id:ZK", -1);
 initializeValue("id:GS", 8);

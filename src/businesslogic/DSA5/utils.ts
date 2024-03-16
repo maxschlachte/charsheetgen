@@ -42,6 +42,9 @@ function chooseModifierAndMakeCheck (makeCheck: Function, elementId: string, hea
   const inputId = "id:modifier-dialog";
   const type = INPUT_TYPES.NUMERIC;
   const placeholder = "Modifikator";
+  if(ability.startsWith("id:")){
+    ability = getStringValue(ability);
+  }
   const message = `Gib den Modifikator für den Wurf auf ${ability} an!`;
   chooseAndDo(inputId, type, placeholder, message, makeCheck, elementId, headline, ability, callback);
 }
@@ -187,7 +190,7 @@ export const chooseModifierAndMakeHealingRoll = (elementId: string, headline: st
 }
 export const makeHealingRollWithFixedModifier = (elementId: string, headline: string, ability: string, modifier: number, callback?: Function) => {
   const currentValue = getNumberValue(elementId);
-  const maxValue = getNumberValue(elementId + "-max");
+  const maxValue = getNumberValue(elementId.replace("eP", "E"));
   const rnd = Math.floor(Math.random() * 6) + 1;
   const result = rnd + modifier;
   const newValue = Math.min(currentValue + result, maxValue);
@@ -349,7 +352,7 @@ function getTriple(elementId: string){
       }
     }
   }
-  return "";
+  return getStringValue(elementId.replace("-", "-properties-"));
 }
 
 export const initializeValue = (elementId: string, startValue: any) => {

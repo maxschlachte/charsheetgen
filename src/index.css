@@ -13,3 +13,8 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+/* prevent input fields with long labels from overflowing */
+.v-field__outline__notch {
+  max-width: calc(100% - var(--v-field-padding-start) - var(--v-field-padding-end)) !important;
+}

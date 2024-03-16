@@ -59,26 +59,46 @@ export const trackAP = () => {
             spent_AP += calcCosts(startValue, currentValue, skill.group);
         }
     }
+    for(const prefix of ["Zauber", "Liturgie"]){
+        for(var i = 1; i <= 40; ++i){
+            const id = i.toString();
+            const spellName = getStringValue("id:" + prefix + "-name-" + id).trim();
+            const spellTime = getStringValue("id:" + prefix + "-time-" + id).trim();
+            const spellDistance = getStringValue("id:" + prefix + "-distance-" + id).trim();
+            const spellDuration = getStringValue("id:" + prefix + "-duration-" + id).trim();
+            const spellProperties = getStringValue("id:" + prefix + "-properties-" + id).trim();
+            const spellGroup = getStringValue("id:" + prefix + "-group-" + id);
+            const spellValue = getNumberValue("id:" + prefix + "-" + id);
+            if(spellValue > 0 || !(spellName + spellTime + spellDistance + spellDuration + spellProperties + spellGroup == "")){
+                spent_AP += calcCosts(-1, spellValue, (spellGroup == "" ? "A" : spellGroup));
+            }
+        }
+    }
     const current_MU = getNumberValue("id:MU");
     const current_KL = getNumberValue("id:KL");
     const current_IN = getNumberValue("id:IN");
     const current_KO = getNumberValue("id:KO");
     const current_KK = getNumberValue("id:KK");
-    const current_LE = getNumberValue("id:LE-max");
+    const current_LE = getNumberValue("id:LE");
+    const current_AE = getNumberValue("id:AE");
+    const current_KE = getNumberValue("id:KE");
     const current_SK = getNumberValue("id:SK");
     const current_ZK = getNumberValue("id:ZK");
     const current_GS = getNumberValue("id:GS");
-    const start_LE = current_LE - 2 * getNumberValue("id:KO");
-    if(start_LE < 5){
-        spent_AP -= (5 - start_LE) * 4;
+    const start_LE = current_LE - 5 - 2 * getNumberValue("id:KO");
+    spent_AP += Math.min(start_LE, 7) * (start_LE < 0 ? 4 : 6) + calcCosts(0, Math.max(start_LE - 7, 0), "D");
+    if(current_AE > 0){
+        const start_AE = current_AE - 20 - getNumberValue("id:" + getStringValue("id:Zauber-property"));
+        spent_AP += start_AE * (start_AE < 0 ? 2 : 6);
     }
-    else {
-        spent_AP += Math.min(start_LE - 5, 7) * 6 + calcCosts(0, Math.max(start_LE - 5 - 7, 0), "D");
+    if(current_KE > 0){
+        const start_KE = current_KE - 20 - getNumberValue("id:" + getStringValue("id:Liturgie-property"));
+        spent_AP += start_KE * (start_KE < 0 ? 2 : 6);
     }
     const start_SK = current_SK - Math.round((current_MU + current_KL + current_IN) / 6.0);
-    spent_AP += Math.sign(start_SK + 5) * 25;
+    spent_AP += (start_SK + 5) * 25;
     const start_ZK = current_ZK - Math.round((current_KO + current_KO + current_KK) / 6.0);
-    spent_AP += Math.sign(start_ZK + 5) * 25;
+    spent_AP += (start_ZK + 5) * 25;
     spent_AP += (current_GS - 8) * (current_GS < 8 ? 4 : 8);
     const regexp = /(\d+)\s*AP/gi;
     const fieldIds = ["Vorteile", "Nachteile", "Sprachen_&_Schriften", "allgemeine_Sonderfertigkeiten", "spezielle_Sonderfertigkeiten"];
@@ -122,10 +142,32 @@ export const trackINI = () => {
     updateValue("id:INI-readonly", ini);
 };
 
+// add tooltips with formulas to some fields
+export const trackLabels = () => {
+    const AE_property = getStringValue("id:Zauber-property");
+    const KE_property = getStringValue("id:Liturgie-property");
+    const formulas: { [label: string]: string; } = {
+        "LE" : "GW + 2 × KO + Mod.", 
+        "AE" : "ggf. 20 + " + (AE_property == "" ? "LeitEig." : AE_property) + " + Mod.", 
+        "KE" : "ggf. 20 + " + (KE_property == "" ? "LeitEig." : KE_property) + " + Mod.", 
+        "SK" : "GW + (MU + KL + IN) / 6 + Mod.", 
+        "ZK" : "GW + (KO + KO + KK) / 6 + Mod.",
+    };
+    const labels = document.getElementsByClassName("v-field-label--floating");
+    const info_sign = " 🛈";
+    for(var i = 0; i < labels.length; ++i){
+        const label = labels[i].innerHTML.replace(/<[^>]*>?/gm, '').trim().replace(info_sign, "");
+        if(Object.keys(formulas).includes(label)){
+            labels[i].innerHTML = label + info_sign;
+            labels[i].parentElement!.parentElement!.parentElement!.title = formulas[label];
+        }
+    }
+}
+
 // calculate the "Schmerz" level
 export const trackSchmerz = () => {
-    const current_LE = getNumberValue("id:LE");
-    const max_LE = getNumberValue("id:LE-max");
+    const current_LE = getNumberValue("id:LeP");
+    const max_LE = getNumberValue("id:LE");
     if(max_LE > 0){
         const loss = 1.0*(max_LE-current_LE)/max_LE;
         let s = "";
@@ -144,6 +186,54 @@ export const trackSchmerz = () => {
         updateValue("id:Schmerz-readonly", s);
     }
     updateValue("id:Schmerz-name-readonly", "Schmerz");
+};
+
+// sort the spells alphabetically and expand/reduce the number of rows in the spells table
+export const trackSpells = () => {
+    for(const prefix of ["Zauber", "Liturgie"]){
+        var spells = [];
+        for(var i = 1; i <= 40; ++i){
+            const id = i.toString();
+            const spellName = getStringValue("id:" + prefix + "-name-" + id).trim();
+            const spellTime = getStringValue("id:" + prefix + "-time-" + id).trim();
+            const spellDistance = getStringValue("id:" + prefix + "-distance-" + id).trim();
+            const spellDuration = getStringValue("id:" + prefix + "-duration-" + id).trim();
+            const spellProperties = getStringValue("id:" + prefix + "-properties-" + id).trim();
+            const spellGroup = getStringValue("id:" + prefix + "-group-" + id);
+            const spellValue = getNumberValue("id:" + prefix + "-" + id);
+            if(spellValue > 0 || !(spellName + spellTime + spellDistance + spellDuration + spellProperties + spellGroup == "")){
+                spells.push({name : spellName, time : spellTime, distance : spellDistance, duration : spellDuration, properties : spellProperties, group : spellGroup, value : spellValue});
+            }
+        }
+        spells.sort(function(spell1, spell2){ return spell1.name.localeCompare(spell2.name); });
+        const spells_length = spells.length;
+        for(var i = 1; i <= 40; ++i){
+            const id = i.toString();
+            const spell = (spells.length > 0 ? spells.shift() : {name : "", time : "", distance : "", duration : "", properties : "", group : "", value : ""});
+            updateValue("id:" + prefix + "-name-" + id, (spell as any).name);
+            updateValue("id:" + prefix + "-time-" + id, (spell as any).time);
+            updateValue("id:" + prefix + "-distance-" + id, (spell as any).distance);
+            updateValue("id:" + prefix + "-duration-" + id, (spell as any).duration);
+            updateValue("id:" + prefix + "-properties-" + id, (spell as any).properties);
+            updateValue("id:" + prefix + "-group-" + id, (spell as any).group);
+            updateValue("id:" + prefix + "-" + id, (spell as any).value);
+        }
+        const sheets = document.getElementsByClassName("v-sheet");
+        for(var n = 0; n < sheets.length; ++n){
+            const sheet = sheets[n];
+            if(sheet.innerHTML.trim().startsWith(prefix.toUpperCase())){
+                const table_rows = (sheet.parentElement!).children[1].getElementsByTagName("table")[0].getElementsByTagName("tr");
+                for(var i = 0; i < table_rows.length-1; ++i){
+                    if(i < 1 + Math.max(6, 2 + spells_length - (spells_length % 2))){
+                        (table_rows[i] as HTMLElement).style.display = "table-row";
+                    }
+                    else {
+                        (table_rows[i] as HTMLElement).style.display = "none";
+                    }
+                }
+            }
+        }
+    }
 };
 
 // adapt the icons of the attack and defend buttons to the selected fight skill
@@ -211,7 +301,7 @@ export const trackWeaponIcons = () => {
 export const trackWeight = () => {
     var items = [];
     let weightTotal = 0;
-    for(var i = 1; i < 100; ++i){
+    for(var i = 1; i <= 40; ++i){
         const id = i.toString();
         const itemName = getStringValue("id:item-name-" + id).trim();
         const itemWeight = getNumberValue("id:item-weight-" + id);
@@ -221,7 +311,7 @@ export const trackWeight = () => {
         }
     }
     items.sort(function(item1, item2){ return item1.name.localeCompare(item2.name); });
-    for(var i = 1; i < 100; ++i){
+    for(var i = 1; i <= 40; ++i){
         const id = i.toString();
         const item = (items.length > 0 ? items.shift() : {name : "", weight : ""});
         updateValue("id:item-name-" + id, (item as any).name);
@@ -238,7 +328,9 @@ export const trackAll = () => {
     trackAW();
     trackBE();
     trackINI();
+    trackLabels();
     trackSchmerz();
+    trackSpells();
     trackWeaponIcons();
     trackWeight();
 };
