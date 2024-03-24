@@ -95,7 +95,8 @@ export const makeAttackCheckWithFixedModifier = (elementId: string, headline: st
       const currentValue = getNumberValue("id:" + ability) + propertyBonus.attack;
       const useBE = (getStringValue("id:" + ability + "-BE") != "");
       const rnd = Math.floor(Math.random() * 20) + 1;
-      const weaponModifier = getNumberValue(elementId.replace("-name-", "-modifier-"));
+      const weaponModifiers = getStringValue(elementId.replace("-name-", "-modifier-"));
+      const weaponModifier = (weaponModifiers == "" ? 0 : Number(weaponModifiers.split("/").shift()!.trim()));
       const stateModifier = getStateModifier(useBE);
       const result = (rnd + modifier + weaponModifier + stateModifier);
       success = result <= currentValue;
@@ -149,7 +150,8 @@ export const makeDefenseCheckWithFixedModifier = (elementId: string, headline: s
     const currentValue = Math.round(getNumberValue("id:" + ability) / 2.0) + propertyBonus.defense;
     const useBE = (getStringValue("id:" + ability + "-BE") != "");
     const rnd = Math.floor(Math.random() * 20) + 1;
-    const weaponModifier = getNumberValue(elementId.replace("-name-", "-modifier-"));
+    const weaponModifiers = getStringValue(elementId.replace("-name-", "-modifier-"));
+    const weaponModifier = (weaponModifiers == "" ? 0 : Number(weaponModifiers.split("/").pop()!.trim()));
     const stateModifier = getStateModifier(useBE);
     const result = (rnd + modifier + weaponModifier + stateModifier);
     success = result <= currentValue;
@@ -166,18 +168,12 @@ export const makeDefenseCheckWithFixedModifier = (elementId: string, headline: s
       let armorProtection = 0;
       for(var i = 1; i <= 10; ++i){
         const id = i.toString();
-        if(getStringValue("id:weapon-fightSkill-" + id) == "Rüstung"){
-          armorProtection += getNumberValue("id:weapon-RS-" + id);
-        }
+        armorProtection += getNumberValue("id:armor-RS-" + id);
       }
-      const weaponProtection = (ability == "Rüstung" ? 0 : getNumberValue(elementId.replace("-name-", "-RS-")));
-      const totalProtection = armorProtection + weaponProtection;
       message = `
         ${message}
         Rüstungsschutz
-        Rüstung: ${armorProtection}
-        Waffe: ${weaponProtection}
-        Gesamt: ${totalProtection}
+        Gesamt: ${armorProtection}
       `;
     }
   }

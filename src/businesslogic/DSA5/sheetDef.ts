@@ -139,27 +139,27 @@ function magicTable(name: string){
     type: ELEMENT_TYPES.TABLE,
     column: [
       {
-        name: name,
+        name: prefix,
         width: "22.5%",
         position: POSITIONING.LEFT
       },
       {
-        name: "Kosten",
+        name: (prefix == "Liturgie" ? "KeP" : "AeP"),
         width: "7.5%",
         position: POSITIONING.CENTER
       },
       {
-        name: prefix + "dauer",
+        name: prefix.charAt(0) + "D",
         width: "12.5%",
         position: POSITIONING.CENTER
       },
       {
-        name: "Reichweite",
+        name: "RW",
         width: "12.5%",
         position: POSITIONING.CENTER
       },
       {
-        name: "Wirkungsdauer",
+        name: "WD",
         width: "12.5%",
         position: POSITIONING.CENTER
       },
@@ -243,7 +243,7 @@ function magicTable(name: string){
   }
   magicTable.cells.push([
     {
-      name: "Leiteigenschaft",
+      name: "LeitEig.",
       type: CELL_TYPES.STRING,
     },
     {
@@ -264,7 +264,7 @@ function magicTable(name: string){
     },
     {
       id: "id:" + prefix + "-property",
-      name: "Leiteigenschaft",
+      name: "Eigenschaft",
       type: CELL_TYPES.INPUT_STRING,
     },
     {
@@ -301,6 +301,27 @@ function stateRow(i: number, name: string = ""){
   return [nameCell, valueCell];
 }
 
+function armorRow(i: number){
+  const id = i.toString();
+  return [
+    {
+      id: "id:armor-name-" + id,
+      name: "",
+      type: CELL_TYPES.INPUT_STRING,
+    },
+    {
+      id: "id:armor-RS-" + id,
+      name: "",
+      type: CELL_TYPES.INPUT_NUMBER,
+    },
+    {
+      id: "id:armor-BE-" + id,
+      name: "",
+      type: CELL_TYPES.INPUT_NUMBER,
+    },
+  ]
+}
+
 function itemRow(i: number){
   const id = i.toString();
   return [
@@ -321,46 +342,26 @@ function weaponRow(i: number){
   const id = i.toString();
   const nameCell: IInputText = {
     id: "id:weapon-name-" + id,
-    name: "Rüstzeug",
+    name: "Waffe",
     type: CELL_TYPES.INPUT_STRING,
-    colspan: 1
+    colspan: 2
   };
   const fightSkillCell: ISelect = {
     id: "id:weapon-fightSkill-" + id,
     name: "Kampftechnik",
     type: CELL_TYPES.SELECT,
-    items: ["Rüstung"].concat(fightSkills.map(skill => skill.name).sort()),
-    colspan: 1
-  };
-  const rsCell: IInputNumber = {
-    id: "id:weapon-RS-" + id,
-    name: "RS",
-    type: CELL_TYPES.INPUT_NUMBER,
-    range: [-10,10],
-    colspan: 1
-  };
-  const beCell: IInputNumber = {
-    id: "id:weapon-BE-" + id,
-    name: "BE",
-    type: CELL_TYPES.INPUT_NUMBER,
-    range: [-10,10],
-    colspan: 1
-  };
-  const indentCell: IText = {
-    name: "",
-    type: CELL_TYPES.STRING,
-    colspan: 1
-  };
-  const modifierCell: IInputNumber = {
-    id: "id:weapon-modifier-" + id,
-    name: "AT/PA Mod.",
-    type: CELL_TYPES.INPUT_NUMBER,
-    range: [-10,10],
-    colspan: 1
+    items: fightSkills.map(skill => skill.name).sort(),
+    colspan: 2
   };
   const damageCell: IInputText = {
     id: "id:weapon-damage-" + id,
     name: "TP",
+    type: CELL_TYPES.INPUT_STRING,
+    colspan: 1
+  };
+  const modifierCell: IInputText = {
+    id: "id:weapon-modifier-" + id,
+    name: "±AT/PA",
     type: CELL_TYPES.INPUT_STRING,
     colspan: 1
   };
@@ -382,7 +383,7 @@ function weaponRow(i: number){
     },
     colspan: 1
   };
-  return [nameCell, rsCell, beCell, fightSkillCell, modifierCell, damageCell, attackCell, defendCell];
+  return [nameCell, fightSkillCell, damageCell, modifierCell, attackCell, defendCell];
 }
 
 const emptyLine = [
@@ -514,7 +515,7 @@ export const sheetDef: ISheet = {
               propertyCheck("KK"),
               {
                 id: "id:SP",
-                name: "Schicksalspunkte",
+                name: "SP",
                 type: CELL_TYPES.INPUT_NUMBER,
                 colspan: 2
               },
@@ -649,6 +650,46 @@ export const sheetDef: ISheet = {
           type: ELEMENT_TYPES.TABLE,
           column: [
             {
+              name: "Rüstung",
+              width: "30%",
+              position: POSITIONING.LEFT
+            },
+            {
+              name: "RS",
+              width: "10%",
+              position: POSITIONING.CENTER
+            },
+            {
+              name: "BE",
+              width: "10%",
+              position: POSITIONING.CENTER
+            },
+            {
+              name: "Rüstung",
+              width: "30%",
+              position: POSITIONING.LEFT
+            },
+            {
+              name: "RS",
+              width: "10%",
+              position: POSITIONING.CENTER
+            },
+            {
+              name: "BE",
+              width: "10%",
+              position: POSITIONING.CENTER
+            },
+          ],
+          cells: [
+            armorRow(1).concat(armorRow(4)),
+            armorRow(2).concat(armorRow(5)),
+            armorRow(3).concat(armorRow(6)),
+          ]
+        },
+        {
+          type: ELEMENT_TYPES.TABLE,
+          column: [
+            {
               name: "Gegenstand",
               width: "30%",
               position: POSITIONING.LEFT
@@ -701,7 +742,7 @@ export const sheetDef: ISheet = {
                 type: CELL_TYPES.INPUT_STRING,
               },
               {
-                name: "Tragkraft",
+                name: "TK",
                 type: CELL_TYPES.STRING,
               },
               {
@@ -727,7 +768,7 @@ export const sheetDef: ISheet = {
       ]
     },
     {
-      headline: "Rüstungen, Waffen & Schilde",
+      headline: "Waffen & Schilde",
       colspan: 2,
       elements: [
         {
@@ -738,7 +779,6 @@ export const sheetDef: ISheet = {
             weaponRow(3),
             weaponRow(4),
             weaponRow(5),
-            weaponRow(6),
           ]
         } as IGrid
       ]

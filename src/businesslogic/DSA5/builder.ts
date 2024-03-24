@@ -112,6 +112,29 @@ export const trackAP = () => {
     updateValue("id:AP-spent-readonly", spent_AP);
 };
 
+// sort armor alphabetically
+export const trackArmor = () => {
+    var items = [];
+    let weightTotal = 0;
+    for(var i = 1; i <= 10; ++i){
+        const id = i.toString();
+        const itemName = getStringValue("id:armor-name-" + id).trim();
+        const itemRS = getNumberValue("id:armor-RS-" + id);
+        const itemBE = getNumberValue("id:armor-BE-" + id);
+        if(itemRS > 0 || itemBE > 0 || !(itemName == "")){
+            items.push({name : itemName, rs : itemRS, be : itemBE});
+        }
+    }
+    items.sort(function(item1, item2){ return item1.name.localeCompare(item2.name); });
+    for(var i = 1; i <= 10; ++i){
+        const id = i.toString();
+        const item = (items.length > 0 ? items.shift() : {name : "", rs : "", be: ""});
+        updateValue("id:armor-name-" + id, (item as any).name);
+        updateValue("id:armor-RS-" + id, (item as any).rs);
+        updateValue("id:armor-BE-" + id, (item as any).be);
+    }
+};
+
 // calculate AW
 export const trackAW = () => {
     const ge = getNumberValue("id:GE");
@@ -126,7 +149,7 @@ export const trackBE = () => {
     let d = Math.floor(Math.max(0, weightTotal-tk) / 4.0);
     for(var i = 1; i <= 10; ++i){
         const id = i.toString();
-        d += getNumberValue("id:weapon-BE-" + id);
+        d += getNumberValue("id:armor-BE-" + id);
     }
     d = Math.min(d, 4);
     const be = ["", "I", "II", "III", "IV"][d];
@@ -246,7 +269,7 @@ export const trackWeaponIcons = () => {
     const sheets = document.getElementsByClassName("v-sheet");
     for(var n = 0; n < sheets.length; ++n){
         const sheet = sheets[n];
-        if(sheet.innerHTML.trim().replaceAll("&amp;", "&") == "RÜSTUNGEN, WAFFEN & SCHILDE"){
+        if(sheet.innerHTML.trim().replaceAll("&amp;", "&") == "WAFFEN & SCHILDE"){
             const grid = (sheet.parentElement!).children[1].children[0].children[0];
             const labels = [];
             const buttons = [];
@@ -325,6 +348,7 @@ export const trackWeight = () => {
 
 export const trackAll = () => {
     trackAP();
+    trackArmor();
     trackAW();
     trackBE();
     trackINI();
