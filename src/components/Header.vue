@@ -60,6 +60,7 @@ const menuEntries = [
                         callback: () => {
                             useStore().resetSaveables();
                             useDialog().closeDialog();
+                            window.location.reload();
                         }
                     },
                     {
