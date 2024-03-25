@@ -54,9 +54,11 @@ export const trackAP = () => {
     }
     for(const skills of [physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills]){
         for(const skill of skills){
-            const currentValue = getNumberValue("id:" + skill.name.replaceAll(" ", "_"));
+            const id = skill.name.replaceAll(" ", "_");
             const startValue = (skills == fightSkills ? 6 : 0);
-            spent_AP += calcCosts(startValue, currentValue, skill.group);
+            const currentValue = getNumberValue("id:" + id);
+            const skillGroup = getStringValue("id:" + id + "-group");
+            spent_AP += calcCosts(startValue, currentValue, (skillGroup == "" ? skill.group : skillGroup));
         }
     }
     for(const prefix of ["Zauber", "Liturgie"]){
@@ -151,7 +153,7 @@ export const trackBE = () => {
         const id = i.toString();
         d += getNumberValue("id:armor-BE-" + id);
     }
-    d = Math.min(d, 4);
+    d = Math.max(0, Math.min(d, 4));
     const be = ["", "I", "II", "III", "IV"][d];
     updateValue("id:Belastung-name-readonly", "Belastung");
     updateValue("id:Belastung-readonly", be);

@@ -102,12 +102,13 @@ function skillsTable(group: string, properties: string, skills: {name: string; p
       id: "id:" + id + "-BE",
       name: "",
       type: CELL_TYPES.SELECT,
-      items: ["", "x"],
-      colspan: 1
+      items: ["", "x"]
     };
-    const groupCell: ICell = {
-      name: skill.group,
-      type: CELL_TYPES.STRING,
+    const groupCell: ISelect = {
+      id: "id:" + id + "-group",
+      name: "",
+      type: CELL_TYPES.SELECT,
+      items: ["", "A", "B", "C", "D"]
     };
     const valueCell: IInputNumber = {
       id: "id:" + id,
@@ -222,8 +223,7 @@ function magicTable(name: string){
       id: "id:" + prefix + "-group-" + id,
       name: "",
       type: CELL_TYPES.SELECT,
-      items: ["", "A", "B", "C", "D"],
-      colspan: 1
+      items: ["", "A", "B", "C", "D"]
     };
     const valueCell: IInputNumber = {
       id: "id:" + prefix + "-" + id,
@@ -779,6 +779,7 @@ export const sheetDef: ISheet = {
             weaponRow(3),
             weaponRow(4),
             weaponRow(5),
+            weaponRow(6),
           ]
         } as IGrid
       ]
@@ -811,14 +812,15 @@ initializeValue("id:SK", -1);
 initializeValue("id:ZK", -1);
 initializeValue("id:GS", 8);
 
-// initialise FW and BE for all skills
+// initialise BE, SF and FW for all skills
 for(const skills of [physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills]){
   for(const skill of skills){
     const name = skill.name.replaceAll(" ", "_");
-    initializeValue("id:" + name, (skills == fightSkills ? 6 : 0));
     if(skill.be == "ja"){
       initializeValue("id:" + name + "-BE", "x");
     }
+    initializeValue("id:" + name + "-group", skill.group);
+    initializeValue("id:" + name, (skills == fightSkills ? 6 : 0));
   }
 }
 

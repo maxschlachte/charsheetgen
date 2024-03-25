@@ -351,8 +351,8 @@ function getTriple(elementId: string){
   return getStringValue(elementId.replace("-", "-properties-"));
 }
 
-export const initializeValue = (elementId: string, startValue: any) => {
-  if(useStore().getValueById(elementId, undefined) === undefined){
+export const initializeValue = (elementId: string, startValue: any, treatEmptyAsUndefined: boolean = true) => {
+  if((treatEmptyAsUndefined && getStringValue(elementId) == "") || (useStore().getValueById(elementId, undefined) === undefined)){
     updateValue(elementId, startValue);
   }
 }
