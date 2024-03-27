@@ -338,6 +338,8 @@ function itemRow(i: number){
   ]
 }
 
+export const weaponRows: ((IInputText | ISelect | IButton)[])[] = [];
+
 function weaponRow(i: number){
   const id = i.toString();
   const nameCell: IInputText = {
@@ -383,7 +385,9 @@ function weaponRow(i: number){
     },
     colspan: 1
   };
-  return [nameCell, fightSkillCell, damageCell, modifierCell, attackCell, defendCell];
+  const row = [nameCell, fightSkillCell, damageCell, modifierCell, attackCell, defendCell];
+  weaponRows.push(row);
+  return row;
 }
 
 const emptyLine = [

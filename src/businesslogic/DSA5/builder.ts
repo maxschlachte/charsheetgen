@@ -1,6 +1,8 @@
 import { MDI } from "./icons";
 import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills } from "./staticData";
 import { getNumberValue, getStringValue, updateValue } from "./utils";
+import { weaponRows } from "./sheetDef";
+import { IButton, ISelect } from "@/types/interfaces";
 
 // get the IDs of all input elements
 export const getInputIds = (item: any, ids: string[] = []): string[] => {
@@ -172,11 +174,11 @@ export const trackLabels = () => {
     const AE_property = getStringValue("id:Zauber-property");
     const KE_property = getStringValue("id:Liturgie-property");
     const formulas: { [label: string]: string; } = {
-        "LE" : "GW + 2 × KO + Mod.", 
-        "AE" : "ggf. 20 + " + (AE_property == "" ? "LeitEig." : AE_property) + " + Mod.", 
-        "KE" : "ggf. 20 + " + (KE_property == "" ? "LeitEig." : KE_property) + " + Mod.", 
-        "SK" : "GW + (MU + KL + IN) / 6 + Mod.", 
-        "ZK" : "GW + (KO + KO + KK) / 6 + Mod.",
+        "LE" : "GW + 2 × KO ± Mod.", 
+        "AE" : "ggf. 20 + " + (AE_property == "" ? "LeitEig." : AE_property) + " ± Mod.", 
+        "KE" : "ggf. 20 + " + (KE_property == "" ? "LeitEig." : KE_property) + " ± Mod.", 
+        "SK" : "GW + (MU + KL + IN) / 6 ± Mod.", 
+        "ZK" : "GW + (KO + KO + KK) / 6 ± Mod.",
     };
     const labels = document.getElementsByClassName("v-field-label--floating");
     const info_sign = " 🛈";
@@ -268,55 +270,26 @@ export const trackWeaponIcons = () => {
     for(const skill of fightSkills){
         fightSkillsByName[skill.name] = skill;
     }
-    const sheets = document.getElementsByClassName("v-sheet");
-    for(var n = 0; n < sheets.length; ++n){
-        const sheet = sheets[n];
-        if(sheet.innerHTML.trim().replaceAll("&amp;", "&") == "WAFFEN & SCHILDE"){
-            const grid = (sheet.parentElement!).children[1].children[0].children[0];
-            const labels = [];
-            const buttons = [];
-            for(var i = 0; i < grid.children.length; ++i){
-                const child = grid.children[i];
-                if(child.children[0].classList.contains("v-select")){
-                    const selects = child.children[0].getElementsByClassName("v-select__selection-text");
-                    if(selects.length > 0){
-                        labels.push(selects[0].innerHTML.replace(/<[^>]*>?/gm, '').trim());
-                    }
-                    else {
-                        labels.push("");
-                    }
-                }
-                else if(child.children[0].classList.contains("v-btn")){
-                    buttons.push(child.children[0]);
-                }
+    for(const weaponRow of weaponRows){
+        const id = (weaponRow[1] as ISelect).id!;
+        const skillName = getStringValue(id);
+        if(skillName == ""){
+            (weaponRow[4] as IButton).icon = "";
+            (weaponRow[5] as IButton).icon = "";
+        }
+        else {
+            const skill = fightSkillsByName[skillName];
+            if(skill.fk){
+                (weaponRow[4] as IButton).icon = MDI.RANGED;
             }
-            const attackButtons : any[] = [];
-            const defendButtons : any[] = [];
-            for(var i = 0; i < buttons.length; ++i){
-                (i % 2 == 0 ? attackButtons : defendButtons).push(buttons[i]);
+            else {
+                (weaponRow[4] as IButton).icon = (isDwarf ? MDI.MELEE_AXE : MDI.MELEE);
             }
-            for(var i = 0; i < labels.length; ++i){
-                const attackElem = attackButtons[i].getElementsByClassName("mdi")[0];
-                const defendElem = defendButtons[i].getElementsByClassName("mdi")[0];
-                attackElem.classList.remove(MDI.MELEE);
-                attackElem.classList.remove(MDI.MELEE_AXE, "mdi-flip-h");
-                attackElem.classList.remove(MDI.RANGED);
-                defendElem.classList.remove(MDI.DEFEND);
-                if(Object.keys(fightSkillsByName).includes(labels[i])){
-                    const skill = fightSkillsByName[labels[i]];
-                    if(skill.fk){
-                        attackElem.classList.add(MDI.RANGED);
-                    }
-                    else if(isDwarf){
-                        attackElem.classList.add(MDI.MELEE_AXE, "mdi-flip-h");
-                    }
-                    else {
-                        attackElem.classList.add(MDI.MELEE);
-                    }
-                    if(skill.pa){
-                        defendElem.classList.add(MDI.DEFEND);
-                    }
-                }
+            if(skill.pa){
+                (weaponRow[5] as IButton).icon = MDI.DEFEND;
+            }
+            else {
+                (weaponRow[5] as IButton).icon = "";
             }
         }
     }

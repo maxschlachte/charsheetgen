@@ -98,15 +98,15 @@ export const makeAttackCheckWithFixedModifier = (elementId: string, headline: st
       const weaponModifiers = getStringValue(elementId.replace("-name-", "-modifier-"));
       const weaponModifier = (weaponModifiers == "" ? 0 : Number(weaponModifiers.split("/").shift()!.trim()));
       const stateModifier = getStateModifier(useBE);
-      const result = (rnd + modifier + weaponModifier + stateModifier);
-      success = result <= currentValue;
+      const result = currentValue + modifier + weaponModifier - stateModifier;
+      success = rnd <= result;
       message = `
-        Gewürfelt: ${rnd}
-        Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
-        Waffe: ${(weaponModifier >= 0 ? "+" : "-") + Math.abs(weaponModifier)}
-        Zustände: ${(stateModifier >= 0 ? "+" : "-") + Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
-        Ergebnis: ${result}
         Zielwert: ${currentValue}
+        Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
+        Waffe: ${(weaponModifier >= 0 ? "+" : "-") + Math.abs(weaponModifier)}
+        Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
+        Ergebnis: ${result}
+        Gewürfelt: ${rnd}
         Die Probe auf ${ability} war ein ${success ? "Erfolg" : "Fehlschlag"}!
       `;
       if(success){
@@ -153,15 +153,15 @@ export const makeDefenseCheckWithFixedModifier = (elementId: string, headline: s
     const weaponModifiers = getStringValue(elementId.replace("-name-", "-modifier-"));
     const weaponModifier = (weaponModifiers == "" ? 0 : Number(weaponModifiers.split("/").pop()!.trim()));
     const stateModifier = getStateModifier(useBE);
-    const result = (rnd + modifier + weaponModifier + stateModifier);
-    success = result <= currentValue;
+    const result = currentValue + modifier + weaponModifier - stateModifier;
+    success = rnd <= result;
     message = `
-      Gewürfelt: ${rnd}
-      Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
-      Waffe: ${(weaponModifier >= 0 ? "+" : "-") + Math.abs(weaponModifier)}
-      Zustände: ${(stateModifier >= 0 ? "+" : "-") + Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
-      Ergebnis: ${result}
       Zielwert: ${currentValue}
+      Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
+      Waffe: ${(weaponModifier >= 0 ? "+" : "-") + Math.abs(weaponModifier)}
+      Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
+      Ergebnis: ${result}
+      Gewürfelt: ${rnd}
       Die Probe auf ${ability} war ein ${success ? "Erfolg" : "Fehlschlag"}!
     `;
     if(!success){
@@ -211,14 +211,14 @@ export const makeSimpleCheckWithFixedModifier = (elementId: string, headline: st
   const currentValue = getNumberValue(elementId) + propertyBonus.attack;
   const rnd = Math.floor(Math.random() * 20) + 1;
   const stateModifier = getStateModifier(useBE);
-  const result = (rnd + modifier + stateModifier);
-  const success = result <= currentValue;
+  const result = currentValue + modifier - stateModifier;
+  const success = rnd <= result;
   const message = `
-    Gewürfelt: ${rnd}
-    Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
-    Zustände: ${(stateModifier >= 0 ? "+" : "-") + Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
-    Ergebnis: ${result}
     Zielwert: ${currentValue}
+    Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
+    Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
+    Ergebnis: ${result}
+    Gewürfelt: ${rnd}
     Die Probe auf ${ability} war ein ${success ? "Erfolg" : "Fehlschlag"}!
   `;
   dialogData(headline, success, message, callback);
@@ -239,19 +239,19 @@ export const makeTripleCheckWithFixedModifier = (elementId: string, headline: st
   const rnd2 = Math.floor(Math.random() * 20) + 1;
   const rnd3 = Math.floor(Math.random() * 20) + 1;
   const stateModifier = getStateModifier(useBE);
-  const resultValue1 = rnd1 + modifier + stateModifier;
-  const resultValue2 = rnd2 + modifier + stateModifier;
-  const resultValue3 = rnd3 + modifier + stateModifier;
-  const result = Math.max(resultValue1 - tripleValue1, 0) + Math.max(resultValue2 - tripleValue2, 0) + Math.max(resultValue3 - tripleValue3, 0);
+  const resultValue1 = tripleValue1 + modifier - stateModifier;
+  const resultValue2 = tripleValue2 + modifier - stateModifier;
+  const resultValue3 = tripleValue3 + modifier - stateModifier;
+  const result = Math.max(rnd1 - resultValue1, 0) + Math.max(rnd2 - resultValue2, 0) + Math.max(rnd3 - resultValue3, 0);
   const success = result <= currentValue;
   const diff = Math.abs(currentValue-result);
   const qs = Math.max(1, Math.min(Math.ceil(diff/3.0), 6));
   const message = `
-    Gewürfelt: ${rnd1}, ${rnd2}, ${rnd3}
-    Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
-    Zustände: ${(stateModifier >= 0 ? "+" : "-") + Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
-    Ergebnis: ${resultValue1}, ${resultValue2}, ${resultValue3}
     Zielwert: ${tripleValue1}, ${tripleValue2}, ${tripleValue3}
+    Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
+    Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
+    Ergebnis: ${resultValue1}, ${resultValue2}, ${resultValue3}
+    Gewürfelt: ${rnd1}, ${rnd2}, ${rnd3}
     Die Probe auf ${ability} war ein ${success ? "Erfolg" : "Fehlschlag"}!
     ${success ? "Übrige" : "Fehlende"} Punkte: ${diff} ${success ? "(Qualiätsstufe " + qs + ")" : ""}
   `;
