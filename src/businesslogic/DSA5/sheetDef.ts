@@ -834,6 +834,6 @@ trackAll();
 const ids = getInputIds(sheetDef);
 for(const id of ids){
   useStore().watch(id, (newValue : any) => {
-    trackAll();
+    trackAll(id);
   }); 
 }

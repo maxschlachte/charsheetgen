@@ -42,6 +42,8 @@ function calcCosts(startValue: number, currentValue: number, group: string){
     return spent_AP;
 }
 
+const idsTrackFunctions: [RegExp[], Function][] = [];
+
 // calculate the spent AP
 export const trackAP = () => {
     let spent_AP = 0;
@@ -115,6 +117,8 @@ export const trackAP = () => {
     }
     updateValue("id:AP-spent-readonly", spent_AP);
 };
+const idsTrackAP = ([] as RegExp[]);
+idsTrackFunctions.push([idsTrackAP, trackAP]);
 
 // sort armor alphabetically
 export const trackArmor = () => {
@@ -138,6 +142,8 @@ export const trackArmor = () => {
         updateValue("id:armor-BE-" + id, (item as any).be);
     }
 };
+const idsTrackArmor = [/id:armor-(BE|name|RS)-\d+/];
+idsTrackFunctions.push([idsTrackArmor, trackArmor]);
 
 // calculate AW
 export const trackAW = () => {
@@ -145,6 +151,8 @@ export const trackAW = () => {
     const aw = Math.round(ge/2.0);
     updateValue("id:AW-readonly", aw);
 };
+const idsTrackAW = [/id:GE/];
+idsTrackFunctions.push([idsTrackAW, trackAW]);
 
 // calculate BE from armor and equipment
 export const trackBE = () => {
@@ -160,6 +168,8 @@ export const trackBE = () => {
     updateValue("id:Belastung-name-readonly", "Belastung");
     updateValue("id:Belastung-readonly", be);
 };
+const idsTrackBE = [/id:armor-BE-\d+/, /id:weight-(max|total)-readonly/];
+idsTrackFunctions.push([idsTrackBE, trackBE]);
 
 // calculate INI
 export const trackINI = () => {
@@ -168,6 +178,8 @@ export const trackINI = () => {
     const ini = Math.round((mu+ge)/2.0);
     updateValue("id:INI-readonly", ini);
 };
+const idsTrackINI = [/id:GE/, /id:MU/];
+idsTrackFunctions.push([idsTrackINI, trackINI]);
 
 // add tooltips with formulas to some fields
 export const trackLabels = () => {
@@ -189,7 +201,9 @@ export const trackLabels = () => {
             labels[i].parentElement!.parentElement!.parentElement!.title = formulas[label];
         }
     }
-}
+};
+const idsTrackLabels = [/id:[^-]+/, /id:(Liturgie|Zauber)-property/];
+idsTrackFunctions.push([idsTrackLabels, trackLabels]);
 
 // calculate the "Schmerz" level
 export const trackSchmerz = () => {
@@ -214,6 +228,8 @@ export const trackSchmerz = () => {
     }
     updateValue("id:Schmerz-name-readonly", "Schmerz");
 };
+const idsTrackSchmerz = [/id:LE/, /id:LeP/];
+idsTrackFunctions.push([idsTrackSchmerz, trackSchmerz]);
 
 // sort the spells alphabetically and expand/reduce the number of rows in the spells table
 export const trackSpells = () => {
@@ -262,6 +278,8 @@ export const trackSpells = () => {
         }
     }
 };
+const idsTrackSpells = [/id:(Liturgie|Zauber)-\d+/, /id:(Liturgie|Zauber)-(distance|duration|group|name|properties|time)-\d+/];
+idsTrackFunctions.push([idsTrackSpells, trackSpells]);
 
 // adapt the icons of the attack and defend buttons to the selected fight skill
 export const trackWeaponIcons = () => {
@@ -294,6 +312,8 @@ export const trackWeaponIcons = () => {
         }
     }
 };
+const idsTrackWeaponIcons = [/id:Spezies/, /id:weapon-fightSkill-\d+/];
+idsTrackFunctions.push([idsTrackWeaponIcons, trackWeaponIcons]);
 
 // sort the equipment alphabetically; update "Gesamtgewicht" and "Tragkraft"
 export const trackWeight = () => {
@@ -320,16 +340,26 @@ export const trackWeight = () => {
     const tk = kk * 2;
     updateValue("id:weight-max-readonly", tk);
 };
+const idsTrackWeight = [/id:KK/, /id:item-(name|weight)-\d+/];
+idsTrackFunctions.push([idsTrackWeight, trackWeight]);
 
-export const trackAll = () => {
-    trackAP();
-    trackArmor();
-    trackAW();
-    trackBE();
-    trackINI();
-    trackLabels();
-    trackSchmerz();
-    trackSpells();
-    trackWeaponIcons();
-    trackWeight();
+const idMatch = (ids: RegExp[], id: string | undefined) => {
+    if((ids.length == 0) || (id === undefined)){
+        return true;
+    }
+    for(const idRegex of ids){
+        const idRegexFull = new RegExp("^" + idRegex.source + "$");
+        if(id.match(idRegexFull)){
+            return true;
+        }
+    }
+    return false;
+};
+
+export const trackAll = (id: string | undefined = undefined) => {
+    for(const idsTrackFunction of idsTrackFunctions){
+        if(idMatch(idsTrackFunction[0], id)){
+            idsTrackFunction[1]();
+        }
+    }
 };
