@@ -517,8 +517,8 @@ export const sheetDef: ISheet = {
               propertyField("KK"),
               propertyCheck("KK"),
               {
-                id: "id:SP",
-                name: "SP",
+                id: "id:Schip",
+                name: "Schip",
                 type: CELL_TYPES.INPUT_NUMBER,
                 colspan: 2
               },

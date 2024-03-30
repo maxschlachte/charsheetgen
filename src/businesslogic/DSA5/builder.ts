@@ -332,6 +332,7 @@ export const trackWeight = () => {
         updateValue("id:item-name-" + id, (item as any).name);
         updateValue("id:item-weight-" + id, (item as any).weight);
     }
+    weightTotal = Math.round(weightTotal * 100) / 100;
     updateValue("id:weight-total-readonly", weightTotal);
     const kk = getNumberValue("id:KK");
     const tk = kk * 2;
