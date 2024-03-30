@@ -291,11 +291,10 @@ function stateRow(i: number, name: string = ""){
     type: CELL_TYPES.INPUT_STRING,
     colspan: 2
   };
-  const valueCell: IInputText | ISelect = {
+  const valueCell: IInputText = {
     id: "id:" + (name == "" ? "state-" + id : name + "-readonly"),
     name: "Stufe",
-    type: (name == "" ? CELL_TYPES.SELECT : CELL_TYPES.INPUT_STRING),
-    items: ["", "I", "II", "III", "IV"],
+    type: CELL_TYPES.INPUT_STRING,
     colspan: 1
   };
   return [nameCell, valueCell];
@@ -531,6 +530,8 @@ export const sheetDef: ISheet = {
             stateRow(0, "Schmerz"),
             stateRow(1),
             stateRow(2),
+            stateRow(3),
+            stateRow(4),
             emptyLine,
             [
               {
@@ -591,10 +592,15 @@ export const sheetDef: ISheet = {
       headline: "Fertigkeiten",
       elements: [
         skillsTable("Körpertalente", "MU/GE/KK", physicalSkills),
+        emptyLine,
         skillsTable("Gesellschaftstalente", "IN/CH/CH", socialSkills),
+        emptyLine,
         skillsTable("Naturtalente", "MU/GE/KO", natureSkills),
+        emptyLine,
         skillsTable("Wissenstalente", "KL/KL/IN", scienceSkills),
+        emptyLine,
         skillsTable("Handwerkstalente", "FF/FF/KO", craftSkills),
+        emptyLine,
         skillsTable("Kampftechniken", "", fightSkills),
       ]
     },

@@ -47,14 +47,9 @@ const idsTrackFunctions: [RegExp[], Function][] = [];
 // calculate the spent AP
 export const trackAP = () => {
     let spent_AP = 0;
-    const currentValues = [];
     for(const property of ["MU", "KL", "IN", "CH", "FF", "GE", "KO", "KK"]){
         const currentValue = getNumberValue("id:" + property);
         spent_AP += calcCosts(8, currentValue, "E");
-        currentValues.push(currentValue);
-    }
-    if(Math.min(...currentValues) >= 8 && Math.max(...currentValues) > 8){
-        spent_AP -= groupCosts["E"];
     }
     for(const skills of [physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills]){
         for(const skill of skills){
@@ -291,6 +286,7 @@ export const trackWeaponIcons = () => {
     for(const weaponRow of weaponRows){
         const id = (weaponRow[1] as ISelect).id!;
         const skillName = getStringValue(id);
+        weaponRow[3].name = "±AT/PA";
         if(skillName == ""){
             (weaponRow[4] as IButton).icon = "";
             (weaponRow[5] as IButton).icon = "";
@@ -298,6 +294,7 @@ export const trackWeaponIcons = () => {
         else {
             const skill = fightSkillsByName[skillName];
             if(skill.fk){
+                weaponRow[3].name = "LZ";
                 (weaponRow[4] as IButton).icon = MDI.RANGED;
             }
             else {

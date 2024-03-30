@@ -95,8 +95,10 @@ export const makeAttackCheckWithFixedModifier = (elementId: string, headline: st
       const currentValue = getNumberValue("id:" + ability) + propertyBonus.attack;
       const useBE = (getStringValue("id:" + ability + "-BE") != "");
       const rnd = Math.floor(Math.random() * 20) + 1;
+      const skillName = getStringValue(elementId.replace("-name-", "-fightSkill-"));
+      const fk = (skillName == "" ? false : fightSkills.filter(skill => skill.name == skillName)[0].fk);
       const weaponModifiers = getStringValue(elementId.replace("-name-", "-modifier-"));
-      const weaponModifier = (weaponModifiers == "" ? 0 : Number(weaponModifiers.split("/").shift()!.trim()));
+      const weaponModifier = (weaponModifiers == "" || fk ? 0 : Number(weaponModifiers.split("/").shift()!.trim()));
       const stateModifier = getStateModifier(useBE);
       const result = currentValue + modifier + weaponModifier - stateModifier;
       success = rnd <= result;
@@ -313,11 +315,28 @@ export const changeMoneyWithFixedValue = (headline: string, sign: number, value:
 // get modifier caused by states, including "Schmerz", with or without "Belastung"
 function getStateModifier(includeBE: boolean){
   const romanNumbers: { [romanNumber: string]: number; } = {"" : 0, "I" : 1, "II" : 2, "III" : 3, "IV" : 4};
-  const stateValue0 = romanNumbers[getStringValue("id:Schmerz-readonly")];
-  const stateValue1 = romanNumbers[getStringValue("id:state-1")];
-  const stateValue2 = romanNumbers[getStringValue("id:state-2")];
-  const stateValue3 = (includeBE ? romanNumbers[getStringValue("id:Belastung-readonly")] : 0);
-  return Math.min(stateValue0 + stateValue1 + stateValue2 + stateValue3, 5);
+  const stateValues: { [name: string]: number; } = {};
+  stateValues["Belastung"] = romanNumbers[getStringValue("id:Belastung-readonly")]
+  stateValues["Schmerz"] = romanNumbers[getStringValue("id:Schmerz-readonly")];
+  for(var i = 1; i <= 10; ++i){
+    const id = i.toString();
+    const valueField = getStringValue("id:state-" + id);
+    const value = (romanNumbers.hasOwnProperty(valueField) ? romanNumbers[valueField] : getNumberValue("id:state-" + id));
+    const name = getStringValue("id:state-name-" + id);
+    if(stateValues.hasOwnProperty(name)){
+      stateValues[name] += value;
+    }
+    else {
+      stateValues[name] = value;
+    }
+  }
+  let stateValueSum = 0;
+  for(const name of Object.keys(stateValues)){
+    if(includeBE || !(name == "Belastung")){
+      stateValueSum += Math.max(0, stateValues[name]);
+    }
+  }
+  return Math.min(stateValueSum, 5);
 }
 
 // get the "Leiteigenschaft" bonus of a fight skill
