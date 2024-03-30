@@ -333,7 +333,7 @@ function getStateModifier(includeBE: boolean){
   let stateValueSum = 0;
   for(const name of Object.keys(stateValues)){
     if(includeBE || !(name == "Belastung")){
-      stateValueSum += Math.max(0, stateValues[name]);
+      stateValueSum += Math.max(0, Math.min(stateValues[name], 4));
     }
   }
   return Math.min(stateValueSum, 5);
