@@ -75,6 +75,7 @@ export interface IButton extends ICell {
 
 export interface IInputNumber extends ICell {
     type: CELL_TYPES.INPUT_NUMBER,
+    readonly?: boolean,
     value?: number,
     range?: [number, number]
 }
@@ -86,6 +87,7 @@ export interface ISelect extends ICell {
 
 export interface IInputText extends ICell {
     type: CELL_TYPES.INPUT_STRING,
+    readonly?: boolean,
     value?: string
 }
 
@@ -120,3 +122,17 @@ export interface IDialogButton {
     text: string,
     callback: Function
 }
+
+export interface IMenuButton {
+    icon: string,
+    title: string,
+    callback: Function
+}
+
+export interface IMenuCheckbox {
+    title: string,
+    storeId: string,
+    callback: Function
+}
+
+export type IMenuEntry = IMenuButton | IMenuCheckbox;

@@ -34,3 +34,7 @@ export enum STORE_CATEGORIES {
     SETTINGS = "SETTINGS",
     STATE = "STATE"
 }
+
+export enum HOOKS {
+    NEW = "NEW"
+}

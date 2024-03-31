@@ -1,13 +1,14 @@
 <template>
     <div :class="`grid ${getGapClass()} ${twGridCols[getGridWidth()]}`">
-        <div v-for="cell in getCells()" :class="getCellClass(cell)">
-            <div v-if="isText(cell)" class="h-full w-full flex items-center">
+        <div v-for="cell in getCells()" :class="`${getCellClass(cell)}`">
+            <div v-if="isText(cell)" class="w-full flex items-center">
                 {{ cell.name }}
             </div>
             <v-text-field
                 v-if="isInputNumber(cell) || isInputText(cell)"
                 :model-value="getModelValue(cell)"
                 :label="cell.name"
+                :readonly="cell.readonly === true"
                 hide-details
                 flat
                 variant="outlined"

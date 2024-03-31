@@ -1,5 +1,5 @@
 import { ELEMENT_TYPES, CELL_TYPES } from "./enums";
-import {IElement, IButton, IText, ITable, IGrid, IInputNumber, IInputText, IBase, ICard, ICell, IDialog, IDialogButton, ISheet, ITextArea, ISelect, IElementText} from "./interfaces";
+import {IElement, IButton, IText, ITable, IGrid, IInputNumber, IInputText, IBase, ICard, ICell, IDialog, IDialogButton, ISheet, ITextArea, ISelect, IElementText, IMenuButton, IMenuCheckbox} from "./interfaces";
 
 export function isBase(obj: any): obj is IBase {
     return 'id' in obj || !obj.hasOwnProperty('id');
@@ -67,4 +67,18 @@ export function isBase(obj: any): obj is IBase {
 
   export function isStringOrNumber(value: unknown): value is string | number {
     return typeof value === 'string' || typeof value === 'number';
+  }
+
+  export function isMenuButton(obj: any): obj is IMenuButton {
+    return obj !== undefined && typeof obj === 'object' &&
+      'icon' in obj && typeof obj.icon === 'string' &&
+      'title' in obj && typeof obj.title === 'string' &&
+      'callback' in obj && typeof obj.callback === 'function';
+  }
+
+  export function isMenuCheckbox(obj: any): obj is IMenuCheckbox {
+    return obj !== undefined && typeof obj === 'object' &&
+      'title' in obj && typeof obj.title === 'string' &&
+      'storeId' in obj && typeof obj.storeId === 'string' &&
+      'callback' in obj && typeof obj.callback === 'function';
   }
