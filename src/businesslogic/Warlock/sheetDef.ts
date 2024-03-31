@@ -88,7 +88,7 @@ export const sheetDef: ISheet = {
     },
     cards: [
       {
-        headline: "Charakter",
+        headline: "Character",
         elements: [
           {
             type: ELEMENT_TYPES.GRID,

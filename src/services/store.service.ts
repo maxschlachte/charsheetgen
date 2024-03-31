@@ -13,17 +13,9 @@ class StoreService {
   }
 
   public watch(id: string, callback: Function) {
-    if (this.store.value[StoreService.LOCAL] !== undefined &&
-      this.store.value[StoreService.LOCAL][id] !== undefined) {
-        watch(this.store.value[StoreService.LOCAL][id], (newValue, oldValue) => {
-          callback(newValue);
-        })
-    } else if (this.store.value[StoreService.SAVEABLE] !== undefined &&
-      this.store.value[StoreService.SAVEABLE][id] !== undefined) {
-        watch(this.store.value[StoreService.SAVEABLE][id], (newValue, oldValue) => {
-          callback(newValue);
-        })
-    }
+    watch(() => this.getValueById(id, 0), (newValue, oldValue) => {
+      callback(newValue);
+    })
   }
 
   public getValueById<Type>(id: string, def: Type): Type {
