@@ -1,4 +1,4 @@
-import { ELEMENT_TYPES, CELL_TYPES } from "./enums";
+import { ELEMENT_TYPES, CELL_TYPES, MENU_ENTRY_TYPES } from "./enums";
 import {IElement, IButton, IText, ITable, IGrid, IInputNumber, IInputText, IBase, ICard, ICell, IDialog, IDialogButton, ISheet, ITextArea, ISelect, IElementText, IMenuButton, IMenuCheckbox} from "./interfaces";
 
 export function isBase(obj: any): obj is IBase {
@@ -71,6 +71,7 @@ export function isBase(obj: any): obj is IBase {
 
   export function isMenuButton(obj: any): obj is IMenuButton {
     return obj !== undefined && typeof obj === 'object' &&
+      'type' in obj && obj.type === MENU_ENTRY_TYPES.BUTTON &&
       'icon' in obj && typeof obj.icon === 'string' &&
       'title' in obj && typeof obj.title === 'string' &&
       'callback' in obj && typeof obj.callback === 'function';
@@ -78,6 +79,7 @@ export function isBase(obj: any): obj is IBase {
 
   export function isMenuCheckbox(obj: any): obj is IMenuCheckbox {
     return obj !== undefined && typeof obj === 'object' &&
+      'type' in obj && obj.type === MENU_ENTRY_TYPES.CHECKBOX &&
       'title' in obj && typeof obj.title === 'string' &&
       'storeId' in obj && typeof obj.storeId === 'string' &&
       'callback' in obj && typeof obj.callback === 'function';
