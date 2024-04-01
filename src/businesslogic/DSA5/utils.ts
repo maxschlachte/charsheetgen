@@ -101,7 +101,7 @@ export const makeAttackCheckWithFixedModifier = (elementId: string, headline: st
       const weaponModifier = (weaponModifiers == "" || fk ? 0 : Number(weaponModifiers.split("/").shift()!.trim()));
       const stateModifier = getStateModifier(useBE);
       const result = currentValue + modifier + weaponModifier - stateModifier;
-      success = rnd <= result;
+      success = (rnd == 1 || (rnd <= result && !(rnd == 20)));
       message = `
         Zielwert: ${currentValue}
         Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
@@ -156,7 +156,7 @@ export const makeDefenseCheckWithFixedModifier = (elementId: string, headline: s
     const weaponModifier = (weaponModifiers == "" ? 0 : Number(weaponModifiers.split("/").pop()!.trim()));
     const stateModifier = getStateModifier(useBE);
     const result = currentValue + modifier + weaponModifier - stateModifier;
-    success = rnd <= result;
+    success = (rnd == 1 || (rnd <= result && !(rnd == 20)));
     message = `
       Zielwert: ${currentValue}
       Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
@@ -214,7 +214,7 @@ export const makeSimpleCheckWithFixedModifier = (elementId: string, headline: st
   const rnd = Math.floor(Math.random() * 20) + 1;
   const stateModifier = getStateModifier(useBE);
   const result = currentValue + modifier - stateModifier;
-  const success = rnd <= result;
+  const success = (rnd == 1 || (rnd <= result && !(rnd == 20)));
   const message = `
     Zielwert: ${currentValue}
     Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
@@ -245,8 +245,8 @@ export const makeTripleCheckWithFixedModifier = (elementId: string, headline: st
   const resultValue2 = tripleValue2 + modifier - stateModifier;
   const resultValue3 = tripleValue3 + modifier - stateModifier;
   const result = Math.max(rnd1 - resultValue1, 0) + Math.max(rnd2 - resultValue2, 0) + Math.max(rnd3 - resultValue3, 0);
-  const success = result <= currentValue;
-  const diff = Math.abs(currentValue-result);
+  const success = (([rnd1, rnd2, rnd3].filter(rnd => rnd == 1).length >= 2) || (result <= currentValue && !([rnd1, rnd2, rnd3].filter(rnd => rnd == 20).length >= 2)));
+  const diff = currentValue-result;
   const qs = Math.max(1, Math.min(Math.ceil(diff/3.0), 6));
   const message = `
     Zielwert: ${tripleValue1}, ${tripleValue2}, ${tripleValue3}
@@ -255,7 +255,7 @@ export const makeTripleCheckWithFixedModifier = (elementId: string, headline: st
     Ergebnis: ${resultValue1}, ${resultValue2}, ${resultValue3}
     Gewürfelt: ${rnd1}, ${rnd2}, ${rnd3}
     Die Probe auf ${ability} war ein ${success ? "Erfolg" : "Fehlschlag"}!
-    ${success ? "Übrige" : "Fehlende"} Punkte: ${diff} ${success ? "(Qualiätsstufe " + qs + ")" : ""}
+    ${diff < 0 ? "Fehlende" : "Übrige"} Punkte: ${Math.abs(diff)} ${success ? "(QS " + qs + ")" : ""}
   `;
   dialogData(headline, success, message, callback);
 }
