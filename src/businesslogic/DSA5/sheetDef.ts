@@ -1,7 +1,9 @@
+import { useHooks } from "@/services/hooks.service";
+import { useMenu } from "@/services/menu.service";
 import { useStore } from "@/services/store.service";
 import { CELL_TYPES, ELEMENT_TYPES, POSITIONING } from "@/types/enums";
 import { IButton, ICell, IElement, IElementText, IGrid, IInputNumber, IInputText, ISelect, ISheet, ITable, IText, ITextArea } from "@/types/interfaces";
-import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, initializeValue } from "./utils";
+import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, getStringValue, initializeValue } from "./utils";
 import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills } from "./staticData";
 import { MDI } from "./icons";
 import { getInputIds, trackAll } from "./builder";
@@ -849,3 +851,12 @@ for(const id of ids){
     trackAll(id);
   }); 
 }
+
+useHooks().on("new", () => { window.location.reload(); })
+
+useMenu().addEntry({
+  icon: "mdi-home-edit",
+  title: "Houserules",
+  storeId: "id:houserules",
+  callback: () => { console.log(getStringValue("id:houserules")); }
+});

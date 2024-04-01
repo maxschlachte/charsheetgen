@@ -45,7 +45,7 @@ function calcCosts(startValue: number, currentValue: number, group: string){
 // - "maxPowerLevel": maximum possible level for "Hohe Astralkraft" etc.
 // - "maxAbilityLevel": maximum possible level for "Große Mediation" etc.
 // - "propertyValue": value of "Leiteigenschaft" for "Große Mediation" etc.
-function calcCostsXE(n: number, negativeCosts: number = 0, minPowerLevel: number = 0, maxPowerLevel: number = 7, maxAbilityLevel: number = 0, propertyValue: number = 0, purchased: number = 0){
+function calcCostsXE(n: number, negativeCosts: number = 0, minPowerLevel: number = 0, maxPowerLevel: number = 7, maxAbilityLevel: number = 3, propertyValue: number = 0, purchased: number = 0){
 	const possibs: number[] = [];
     if(n < 0){
         possibs.push(...calcCostsXE(n+1, negativeCosts, minPowerLevel, maxPowerLevel, maxAbilityLevel, propertyValue, purchased).map(x => x - Math.abs(negativeCosts)));
@@ -115,16 +115,16 @@ export const trackAP = () => {
     const current_GS = getNumberValue("id:GS");
     const minPowerLevel = 3;
     const start_LE = current_LE - 5 - 2 * getNumberValue("id:KO");
-    spent_AP += Math.min(...calcCostsXE(start_LE, 4, minPowerLevel, minPowerLevel));
+    spent_AP += Math.min(...calcCostsXE(start_LE, 4, minPowerLevel, 7, 0));
     if(current_AE > 0){
         const propertyValue = getNumberValue("id:" + getStringValue("id:Zauber-property"));
         const start_AE = current_AE - 20 - propertyValue;
-        spent_AP += Math.min(...calcCostsXE(start_AE, 2, minPowerLevel, minPowerLevel, 3, propertyValue));
+        spent_AP += Math.min(...calcCostsXE(start_AE, 2, minPowerLevel, 7, 3, propertyValue));
     }
     if(current_KE > 0){
         const propertyValue = getNumberValue("id:" + getStringValue("id:Liturgie-property"));
         const start_KE = current_KE - 20 - propertyValue;
-        spent_AP += Math.min(...calcCostsXE(start_KE, 2, minPowerLevel, minPowerLevel, 3, propertyValue));
+        spent_AP += Math.min(...calcCostsXE(start_KE, 2, minPowerLevel, 7, 3, propertyValue));
     }
     const start_SK = current_SK - Math.round((current_MU + current_KL + current_IN) / 6.0);
     spent_AP += (start_SK + 5) * 25;
