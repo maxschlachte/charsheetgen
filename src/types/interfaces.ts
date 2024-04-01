@@ -1,4 +1,4 @@
-import { CELL_TYPES, ELEMENT_TYPES, INPUT_TYPES, POSITIONING } from "./enums"
+import { CELL_TYPES, ELEMENT_TYPES, INPUT_TYPES, MENU_ENTRY_TYPES, POSITIONING } from "./enums"
 
 export interface IBase {
     id?: string
@@ -124,12 +124,14 @@ export interface IDialogButton {
 }
 
 export interface IMenuButton {
+    type: MENU_ENTRY_TYPES.BUTTON,
     icon: string,
     title: string,
     callback: Function
 }
 
 export interface IMenuCheckbox {
+    type: MENU_ENTRY_TYPES.CHECKBOX,
     title: string,
     storeId: string,
     callback: Function

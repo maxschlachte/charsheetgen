@@ -38,3 +38,8 @@ export enum STORE_CATEGORIES {
 export enum HOOKS {
     NEW = "NEW"
 }
+
+export enum MENU_ENTRY_TYPES {
+    BUTTON = "BUTTON",
+    CHECKBOX = "CHECKBOX"
+}
