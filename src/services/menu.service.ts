@@ -1,7 +1,7 @@
 import { IDialog, IMenuButton, IMenuEntry } from "@/types/interfaces";
 import { useDialog } from "./dialog.service";
 import { useStore } from "./store.service";
-import { HOOKS, SETTINGS } from '@/types/enums';
+import { HOOKS, MENU_ENTRY_TYPES, SETTINGS } from '@/types/enums';
 import { useHooks } from './hooks.service';
 import { isMenuCheckbox } from "@/types/typeGuards";
 
@@ -11,6 +11,7 @@ class MenuService {
     constructor() {
         this.menuEntries = [
             {
+                type: MENU_ENTRY_TYPES.BUTTON,
                 icon: "mdi-file-document-plus-outline",
                 title: "New",
                 callback: () => {
@@ -38,6 +39,7 @@ class MenuService {
                 }
             },
             {
+                type: MENU_ENTRY_TYPES.BUTTON,
                 icon: "mdi-folder-arrow-up-outline",
                 title: "Open file...",
                 callback: () => { 
@@ -52,11 +54,13 @@ class MenuService {
                 }
             },
             {
+                type: MENU_ENTRY_TYPES.BUTTON,
                 icon: "mdi-content-save-outline",
                 title: "Save",
                 callback: () => { useStore().saveToFile() }
             },
             {
+                type: MENU_ENTRY_TYPES.BUTTON,
                 icon: "mdi mdi-brightness-6",
                 title: "Light/Dark",
                 callback: () => {
