@@ -11,10 +11,7 @@ export const getInputIds = (item: any, ids: string[] = []): string[] => {
             getInputIds(item[i], ids);
         }
     }
-    else if(
-        item.hasOwnProperty("id") &&
-        !item.id.split("-").includes("readonly")
-    ){
+    else if(item.hasOwnProperty("id") && !(item.hasOwnProperty("readonly") && item.readonly)){
         ids.push(item.id);
     }
     else {
@@ -143,7 +140,7 @@ export const trackAP = () => {
             spent_AP += (id == "Nachteile" ? -1 : +1) * Number(match[1]);
         }
     }
-    updateValue("id:AP-spent-readonly", spent_AP);
+    updateValue("id:AP-spent", spent_AP);
 };
 const idsTrackAP = ([] as RegExp[]);
 idsTrackFunctions.push([idsTrackAP, trackAP]);
@@ -177,15 +174,15 @@ idsTrackFunctions.push([idsTrackArmor, trackArmor]);
 export const trackAW = () => {
     const ge = getNumberValue("id:GE");
     const aw = Math.round(ge/2.0);
-    updateValue("id:AW-readonly", aw);
+    updateValue("id:AW", aw);
 };
 const idsTrackAW = [/id:GE/];
 idsTrackFunctions.push([idsTrackAW, trackAW]);
 
 // calculate BE from armor and equipment
 export const trackBE = () => {
-    const weightTotal = getNumberValue("id:weight-total-readonly");
-    const tk = getNumberValue("id:weight-max-readonly");
+    const weightTotal = getNumberValue("id:weight-total");
+    const tk = getNumberValue("id:weight-max");
     let d = Math.floor(Math.max(0, weightTotal-tk) / 4.0);
     for(var i = 1; i <= 10; ++i){
         const id = i.toString();
@@ -193,10 +190,10 @@ export const trackBE = () => {
     }
     d = Math.max(0, Math.min(d, 4));
     const be = ["", "I", "II", "III", "IV"][d];
-    updateValue("id:Belastung-name-readonly", "Belastung");
-    updateValue("id:Belastung-readonly", be);
+    updateValue("id:Belastung-name", "Belastung");
+    updateValue("id:Belastung-", be);
 };
-const idsTrackBE = [/id:armor-BE-\d+/, /id:weight-(max|total)-readonly/];
+const idsTrackBE = [/id:armor-BE-\d+/, /id:weight-(max|total)/];
 idsTrackFunctions.push([idsTrackBE, trackBE]);
 
 // calculate INI
@@ -204,7 +201,7 @@ export const trackINI = () => {
     const mu = getNumberValue("id:MU");
     const ge = getNumberValue("id:GE");
     const ini = Math.round((mu+ge)/2.0);
-    updateValue("id:INI-readonly", ini);
+    updateValue("id:INI", ini);
 };
 const idsTrackINI = [/id:GE/, /id:MU/];
 idsTrackFunctions.push([idsTrackINI, trackINI]);
@@ -252,9 +249,9 @@ export const trackSchmerz = () => {
         else if(loss >= 0.25){
             s = "I";
         }
-        updateValue("id:Schmerz-readonly", s);
+        updateValue("id:Schmerz", s);
     }
-    updateValue("id:Schmerz-name-readonly", "Schmerz");
+    updateValue("id:Schmerz-name", "Schmerz");
 };
 const idsTrackSchmerz = [/id:LE/, /id:LeP/];
 idsTrackFunctions.push([idsTrackSchmerz, trackSchmerz]);
@@ -366,10 +363,10 @@ export const trackWeight = () => {
         updateValue("id:item-weight-" + id, (item as any).weight);
     }
     weightTotal = Math.round(weightTotal * 100) / 100;
-    updateValue("id:weight-total-readonly", weightTotal);
+    updateValue("id:weight-total", weightTotal);
     const kk = getNumberValue("id:KK");
     const tk = kk * 2;
-    updateValue("id:weight-max-readonly", tk);
+    updateValue("id:weight-max", tk);
 };
 const idsTrackWeight = [/id:KK/, /id:item-(name|weight)-\d+/];
 idsTrackFunctions.push([idsTrackWeight, trackWeight]);

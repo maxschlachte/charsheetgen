@@ -5,6 +5,7 @@ import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, ch
 import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills } from "./staticData";
 import { MDI } from "./icons";
 import { getInputIds, trackAll } from "./builder";
+import { read } from "fs";
 
 function textField(name: string, colspan: number = 1){
   return {
@@ -15,38 +16,36 @@ function textField(name: string, colspan: number = 1){
   };
 }
 
-function propertyField(id: string, colspan: number = 1){
-  const name = id.replaceAll("-readonly", "");
+function propertyField(id: string, readonly: boolean = false, colspan: number = 1){
   return {
     id: "id:" + id,
-    name: name,
+    name: id,
     type: CELL_TYPES.INPUT_NUMBER,
+    readonly: readonly,
     colspan: colspan
   };
 }
 
 function propertyCheck(id: string){
-  const name = id.replaceAll("-readonly", "");
   return {
-    name: "Probe: " + name,
+    name: "Probe: " + id,
     type: CELL_TYPES.BUTTON,
     colspan: 1,
     icon: "mdi-dice-d20-outline",
     action: () => {
-      chooseModifierAndMakeSimpleCheck("id:" + id, "Probe: " + name, name);
+      chooseModifierAndMakeSimpleCheck("id:" + id, "Probe: " + id, id);
     }
   };
 }
 
 function propertyRegen(id: string){
-  const name = id.replaceAll("-readonly", "");
   return {
     name: "Regeneration: " + id,
     type: CELL_TYPES.BUTTON,
     colspan: 1,
     icon: MDI.HEAL,
     action: () => {
-      chooseModifierAndMakeHealingRoll("id:" + id, "Regeneration: " + name, name);
+      chooseModifierAndMakeHealingRoll("id:" + id, "Regeneration: " + id, id);
     }
   };
 }
@@ -286,15 +285,17 @@ function magicTable(name: string){
 function stateRow(i: number, name: string = ""){
   const id = i.toString();
   const nameCell: IInputText = {
-    id: "id:" + (name == "" ? "state-name-" + id : name + "-name-readonly"),
+    id: "id:" + (name == "" ? "state-name-" + id : name + "-name"),
     name: "Zustand",
     type: CELL_TYPES.INPUT_STRING,
+    readonly: (name == "" ? false : true),
     colspan: 2
   };
   const valueCell: IInputText = {
-    id: "id:" + (name == "" ? "state-" + id : name + "-readonly"),
+    id: "id:" + (name == "" ? "state-" + id : name),
     name: "Stufe",
     type: CELL_TYPES.INPUT_STRING,
+    readonly: (name == "" ? false : true),
     colspan: 1
   };
   return [nameCell, valueCell];
@@ -462,30 +463,31 @@ export const sheetDef: ISheet = {
               propertyField("KL"),
               propertyCheck("KL"),
               {
-                id: "id:AP-spent-readonly",
+                id: "id:AP-spent",
                 name: "AP (ausgegeben)",
                 type: CELL_TYPES.INPUT_NUMBER,
+                readonly: true,
                 colspan: 4
               },
             ],
             [
               propertyField("IN"),
               propertyCheck("IN"),
-              propertyField("LE", 2),
+              propertyField("LE", false, 2),
               propertyField("LeP"),
               propertyRegen("LeP"),
             ],
             [
               propertyField("CH"),
               propertyCheck("CH"),
-              propertyField("AE", 2),
+              propertyField("AE", false, 2),
               propertyField("AeP"),
               propertyRegen("AeP"),
             ],
             [
               propertyField("FF"),
               propertyCheck("FF"),
-              propertyField("KE", 2),
+              propertyField("KE", false, 2),
               propertyField("KeP"),
               propertyRegen("KeP"),
             ],
@@ -498,8 +500,8 @@ export const sheetDef: ISheet = {
                 type: CELL_TYPES.INPUT_NUMBER,
                 colspan: 2
               },
-              propertyField("AW-readonly"),
-              propertyCheck("AW-readonly"),
+              propertyField("AW", true),
+              propertyCheck("AW"),
             ],
             [
               propertyField("KO"),
@@ -510,8 +512,8 @@ export const sheetDef: ISheet = {
                 type: CELL_TYPES.INPUT_NUMBER,
                 colspan: 2
               },
-              propertyField("INI-readonly"),
-              propertyCheck("INI-readonly"),
+              propertyField("INI", true),
+              propertyCheck("INI"),
             ],
             [
               propertyField("KK"),
@@ -612,27 +614,31 @@ export const sheetDef: ISheet = {
           cells: [
             [
               {
-                id: "id:money-D-readonly",
+                id: "id:money-D",
                 name: "D",
                 type: CELL_TYPES.INPUT_NUMBER,
+                readonly: true,
                 colspan: 1
               },
               {
-                id: "id:money-S-readonly",
+                id: "id:money-S",
                 name: "S",
                 type: CELL_TYPES.INPUT_NUMBER,
+                readonly: true,
                 colspan: 1
               },
               {
-                id: "id:money-H-readonly",
+                id: "id:money-H",
                 name: "H",
                 type: CELL_TYPES.INPUT_NUMBER,
+                readonly: true,
                 colspan: 1
               },
               {
-                id: "id:money-K-readonly",
+                id: "id:money-K",
                 name: "K",
                 type: CELL_TYPES.INPUT_NUMBER,
+                readonly: true,
                 colspan: 1
               },
               {
@@ -747,7 +753,7 @@ export const sheetDef: ISheet = {
                 type: CELL_TYPES.STRING,
               },
               {
-                id: "id:weight-total-readonly",
+                id: "id:weight-total",
                 name: " ",
                 type: CELL_TYPES.INPUT_STRING,
               },
@@ -756,7 +762,7 @@ export const sheetDef: ISheet = {
                 type: CELL_TYPES.STRING,
               },
               {
-                id: "id:weight-max-readonly",
+                id: "id:weight-max",
                 name: " ",
                 type: CELL_TYPES.INPUT_STRING,
               },

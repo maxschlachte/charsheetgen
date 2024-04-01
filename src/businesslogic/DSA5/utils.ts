@@ -272,10 +272,10 @@ export const changeMoneyWithFixedValue = (headline: string, sign: number, value:
   let success = false;
   let message = "";
   if(/^(\s*\d+\s*[DHSK]\s*)+$/i.test(value)){
-    const currentD = getNumberValue("id:money-D-readonly");
-    const currentS = getNumberValue("id:money-S-readonly");
-    const currentH = getNumberValue("id:money-H-readonly");
-    const currentK = getNumberValue("id:money-K-readonly");
+    const currentD = getNumberValue("id:money-D");
+    const currentS = getNumberValue("id:money-S");
+    const currentH = getNumberValue("id:money-H");
+    const currentK = getNumberValue("id:money-K");
     const currentMoney = 1000 * currentD + 100 * currentS + 10 * currentH + currentK;
     const regexp = /(\d+)\s*([DHSK])/gi;
     const matches = [...value.matchAll(regexp)];
@@ -295,13 +295,13 @@ export const changeMoneyWithFixedValue = (headline: string, sign: number, value:
       minus = String(digits.shift());
     }
     const k = (digits.length > 0 ? digits.pop() : "0");
-    updateValue("id:money-K-readonly", (k == "0" ? "" : minus) + k);
+    updateValue("id:money-K", (k == "0" ? "" : minus) + k);
     const h = (digits.length > 0 ? digits.pop() : "0");
-    updateValue("id:money-H-readonly", (h == "0" ? "" : minus) + h);
+    updateValue("id:money-H", (h == "0" ? "" : minus) + h);
     const s = (digits.length > 0 ? digits.pop() : "0");
-    updateValue("id:money-S-readonly", (s == "0" ? "" : minus) + s);
+    updateValue("id:money-S", (s == "0" ? "" : minus) + s);
     const d = (digits.length > 0 ? digits.join("") : "0");
-    updateValue("id:money-D-readonly", (d == "0" ? "" : minus) + d);
+    updateValue("id:money-D", (d == "0" ? "" : minus) + d);
   }
   else {
     message = `
@@ -316,8 +316,8 @@ export const changeMoneyWithFixedValue = (headline: string, sign: number, value:
 function getStateModifier(includeBE: boolean){
   const romanNumbers: { [romanNumber: string]: number; } = {"" : 0, "I" : 1, "II" : 2, "III" : 3, "IV" : 4};
   const stateValues: { [name: string]: number; } = {};
-  stateValues["Belastung"] = romanNumbers[getStringValue("id:Belastung-readonly")]
-  stateValues["Schmerz"] = romanNumbers[getStringValue("id:Schmerz-readonly")];
+  stateValues["Belastung"] = romanNumbers[getStringValue("id:Belastung")]
+  stateValues["Schmerz"] = romanNumbers[getStringValue("id:Schmerz")];
   for(var i = 1; i <= 10; ++i){
     const id = i.toString();
     const valueField = getStringValue("id:state-" + id);
