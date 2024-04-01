@@ -203,6 +203,32 @@ export const makeHealingRollWithFixedModifier = (elementId: string, headline: st
   dialogData(headline, success, message, callback);
 }
 
+// 1d20 houserule check
+export const chooseModifierAndMakeHouseruleCheck = (elementId: string, headline: string, ability: string, callback?: Function) => {
+  chooseModifierAndMakeCheck(makeHouseruleCheckWithFixedModifier, elementId, headline, ability, callback);
+}
+export const makeHouseruleCheckWithFixedModifier = (elementId: string, headline: string, ability: string, modifier: number, callback?: Function) => {
+  const useBE = (getStringValue(elementId + "-BE") != "");
+  const tripleValues = getTriple(elementId).split("/").map(property => getNumberValue("id:" + property)).filter(tripleValue => !(tripleValue == 0));
+  const currentValue = (tripleValues.length > 0 ? Math.min(getNumberValue(elementId), Math.max(...tripleValues)) : getNumberValue(elementId));
+  const rnd = Math.floor(Math.random() * 20) + 1;
+  const stateModifier = getStateModifier(useBE);
+  const result = currentValue + modifier - stateModifier;
+  const success = (rnd == 20 || (rnd + result >= 15 && !(rnd == 1)));
+  const diff = (rnd + result) - 15;
+  const qs = Math.max(1, Math.min(Math.ceil(diff/3.0), 6));
+  const message = `
+    Gewürfelt: ${rnd}
+    Talentwert: ${(currentValue >= 0 ? "+" : "-") + Math.abs(currentValue)}
+    Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
+    Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
+    Ergebnis: ${rnd + result}
+    Die Probe auf ${ability} war ein ${success ? "Erfolg" : "Fehlschlag"}!
+    ${diff < 0 ? "Fehlende" : "Übrige"} Punkte: ${Math.abs(diff)} ${success ? "(QS " + qs + ")" : ""}
+  `;
+  dialogData(headline, success, message, callback);
+}
+
 // 1d20 check
 export const chooseModifierAndMakeSimpleCheck = (elementId: string, headline: string, ability: string, callback?: Function) => {
   chooseModifierAndMakeCheck(makeSimpleCheckWithFixedModifier, elementId, headline, ability, callback);
@@ -378,6 +404,10 @@ export const initializeValue = (elementId: string, startValue: any, treatEmptyAs
 
 export const updateValue = (elementId: string, newValue: any) => {
   useStore().updateSaveableValueById(elementId, newValue);
+}
+
+export const getBooleanValue = (elementId: string): boolean => {
+  return Boolean(useStore().getValueById(elementId, false));
 }
 
 export const getNumberValue = (elementId: string): number => {

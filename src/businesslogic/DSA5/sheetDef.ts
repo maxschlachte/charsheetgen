@@ -1,9 +1,9 @@
 import { useHooks } from "@/services/hooks.service";
 import { useMenu } from "@/services/menu.service";
 import { useStore } from "@/services/store.service";
-import { CELL_TYPES, ELEMENT_TYPES, POSITIONING } from "@/types/enums";
-import { IButton, ICell, IElement, IElementText, IGrid, IInputNumber, IInputText, ISelect, ISheet, ITable, IText, ITextArea } from "@/types/interfaces";
-import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, getStringValue, initializeValue } from "./utils";
+import { CELL_TYPES, ELEMENT_TYPES, MENU_ENTRY_TYPES, POSITIONING } from "@/types/enums";
+import { IButton, ICell, IElement, IElementText, IGrid, IInputNumber, IInputText, IMenuCheckbox, ISelect, ISheet, ITable, IText, ITextArea } from "@/types/interfaces";
+import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeHouseruleCheck, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, getBooleanValue, initializeValue } from "./utils";
 import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills } from "./staticData";
 import { MDI } from "./icons";
 import { getInputIds, trackAll } from "./builder";
@@ -35,7 +35,12 @@ function propertyCheck(id: string){
     colspan: 1,
     icon: "mdi-dice-d20-outline",
     action: () => {
-      chooseModifierAndMakeSimpleCheck("id:" + id, "Probe: " + id, id);
+      if(getBooleanValue("id:houserules")){
+        chooseModifierAndMakeHouseruleCheck("id:" + id, "Probe: " + id, id);
+      }
+      else {
+        chooseModifierAndMakeSimpleCheck("id:" + id, "Probe: " + id, id);
+      }
     }
   };
 }
@@ -122,11 +127,16 @@ function skillsTable(group: string, properties: string, skills: {name: string; p
       type: CELL_TYPES.BUTTON,
       icon: "mdi-dice-d20-outline",
       action: () => {
-        if(skills == fightSkills){
-          chooseModifierAndMakeSimpleCheck("id:" + id, "Probe: " + skill.name, skill.name);
+        if(getBooleanValue("id:houserules")){
+          chooseModifierAndMakeHouseruleCheck("id:" + id, "Probe: " + skill.name, skill.name);
         }
         else {
-          chooseModifierAndMakeTripleCheck("id:" + id, "Probe: " + skill.name, skill.name);
+          if(skills == fightSkills){
+            chooseModifierAndMakeSimpleCheck("id:" + id, "Probe: " + skill.name, skill.name);
+          }
+          else {
+            chooseModifierAndMakeTripleCheck("id:" + id, "Probe: " + skill.name, skill.name);
+          }
         }
       }
     };
@@ -237,7 +247,12 @@ function magicTable(name: string){
       type: CELL_TYPES.BUTTON,
       icon: "mdi-dice-d20-outline",
       action: () => {
-        chooseModifierAndMakeTripleCheck("id:" + prefix + "-" + id, "Probe: " + name, "id:" + prefix + "-name-" + id);
+        if(getBooleanValue("id:houserules")){
+          chooseModifierAndMakeHouseruleCheck("id:" + prefix + "-" + id, "Probe: " + name, "id:" + prefix + "-name-" + id);
+        }
+        else {
+          chooseModifierAndMakeTripleCheck("id:" + prefix + "-" + id, "Probe: " + name, "id:" + prefix + "-name-" + id);
+        }
       }
     };
     magicTable.cells.push([nameCell, costsCell, timeCell, distanceCell, durationCell, propertiesCell, groupCell, valueCell, checkButtonCell])
@@ -855,8 +870,8 @@ for(const id of ids){
 useHooks().on("new", () => { window.location.reload(); })
 
 useMenu().addEntry({
-  icon: "mdi-home-edit",
-  title: "Houserules",
+  title: "House rules",
   storeId: "id:houserules",
-  callback: () => { console.log(getStringValue("id:houserules")); }
+  type: MENU_ENTRY_TYPES.CHECKBOX,
+  callback: () => { console.log("id:houserules", getBooleanValue("id:houserules")); }
 });
