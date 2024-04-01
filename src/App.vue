@@ -11,7 +11,6 @@
 
 <script setup lang="ts">
 import Main from '@/components/Main.vue'
-//import { sheetDef } from '@/businesslogic/sheetDef';
 import { onMounted } from 'vue';
 import { useConfig } from './services/config.service';
 

@@ -1,9 +1,5 @@
 <template>
-  <!--<v-table 
-    class="primary"
-    density="compact"
-  >-->
-  <table class="table-fixed" style="width:100%">
+  <table class="table-auto">
     <thead v-if="getTable().column !== undefined">
       <tr>
         <th

@@ -1,7 +1,8 @@
 <template>
     <v-sheet 
+          :id="id"
           color="secondary"
-          class="ma-0 p-0 rounded overflow-hidden elevation-5"
+          :class="`${$attrs} ma-0 p-0 rounded overflow-hidden elevation-5`"
         >
           <v-sheet
             color="primary"
@@ -42,6 +43,8 @@ import {isGrid, isTable, isElementText} from "@/types/typeGuards";
 const props = defineProps<{
   value: ICard
 }>()
+
+const id: string = self.crypto.randomUUID();
 
 const getCard = () => {
     return props.value;

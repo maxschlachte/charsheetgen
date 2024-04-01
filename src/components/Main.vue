@@ -18,34 +18,50 @@
           </div>
         </div>
       </div>
-      <div class="hidden md:block max-w-[1200px]" style="width:100%">
-        <div id="two-columns" class="grid grid-cols-2 gap-4">
-          <div>
-            <div v-for="(card, index) in getCards().filter((crd, idx) => crd.colspan != 2 && idx % 2 == 0)"
-              :class="`${index != 0 ? 'mt-4' : ''}`"
-            >
-              <Card
-                v-if="isCard(card)"
-                :value="card"
-              />
-              <Grid
-                v-if="isGrid(card)"
-                :value="card"
-              />
+      <div class="hidden md:block max-w-[1200px]">
+        <div class="grid grid-cols-1 gap-4">
+          <div v-for="cards in getCardClusters()">
+            <div v-if="cards[0].colspan != 2" class="two-columns grid grid-cols-2 gap-4">
+              <div>
+                <div v-for="(card, index) in cards.filter((crd, idx) => idx % 2 == 0)"
+                  :class="`${index != 0 ? 'mt-4' : ''}`"
+                >
+                  <Card
+                    v-if="isCard(card)"
+                    :value="card"
+                  />
+                  <Grid
+                    v-if="isGrid(card)"
+                    :value="card"
+                  />
+                </div>
+              </div>
+              <div>
+                <div v-for="(card, index) in cards.filter((crd, idx) => idx % 2 == 1)"
+                  :class="`${index != 0 ? 'mt-4' : ''}`"
+                >
+                  <Card
+                    v-if="isCard(card)"
+                    :value="card"
+                  />
+                  <Grid
+                    v-if="isGrid(card)"
+                    :value="card"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-          <div>
-            <div v-for="(card, index) in getCards().filter((crd, idx) => crd.colspan != 2 && idx % 2 == 1)"
-              :class="`${index != 0 ? 'mt-4' : ''}`"
-            >
-              <Card
-                v-if="isCard(card)"
-                :value="card"
-              />
-              <Grid
-                v-if="isGrid(card)"
-                :value="card"
-              />
+            <div v-if="cards[0].colspan == 2" class="grid grid-cols-1 gap-4">
+              <div v-for="card in cards">
+                <Card
+                  v-if="isCard(card)"
+                  :value="card"
+                />
+                <Grid
+                  v-if="isGrid(card)"
+                  :value="card"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -83,9 +99,16 @@ import Grid from "@/components/Grid.vue";
 import Header from '@/components/Header.vue';
 import DialogContent from "@/components/DialogContent.vue";
 import { useDialog } from "@/services/dialog.service";
+import { useUtils } from "@/services/utils.service";
 import { isCard, isGrid } from "@/types/typeGuards";
-import {ISheet} from "@/types/interfaces";
-import { onMounted } from 'vue';
+import {ICard, IGrid, ISheet} from "@/types/interfaces";
+import { onMounted, onUpdated } from "vue";
+import { useStore } from "@/services/store.service";
+import { SETTINGS } from "@/types/enums";
+import { useTheme } from "vuetify";
+
+const theme = useTheme()
+theme.global.name.value = useStore().getValueById(SETTINGS.DARKMODE, "light");
 
 const props = defineProps<{
   value: ISheet
@@ -102,30 +125,35 @@ const getCards = () => {
   return props.value.cards;
 }
 
-onMounted(() => {
-  // make the two columns the same height
-  setTimeout(function() {
-    const twoColumns = document.getElementById("two-columns");
-    if(!(twoColumns == null)){
-      const column1 = twoColumns.children[0];
-      const column2 = twoColumns.children[1];
-      let height1 = 0;
-      for(var i = 0; i < column1.children.length; ++i){
-        height1 += (column1.children[i] as HTMLElement).offsetHeight;
-        height1 += parseFloat(window.getComputedStyle(column1.children[i]).getPropertyValue("margin-top").replace("px", ""));
-      }
-      let height2 = 0;
-      for(var i = 0; i < column2.children.length; ++i){
-        height2 += (column2.children[i] as HTMLElement).offsetHeight;
-        height2 += parseFloat(window.getComputedStyle(column2.children[i]).getPropertyValue("margin-top").replace("px", ""));
-      }
-      const heightDiff = Math.abs(height1 - height2);
-      const smallerColumn = (height1 < height2 ? column1 : column2);
-      const lastElement = smallerColumn.children[smallerColumn.children.length-1];
-      const lastElementChild = lastElement.children[lastElement.children.length-1];
-      const height = (lastElementChild as HTMLElement).offsetHeight;
-      (lastElementChild as HTMLElement).style.height = (height + heightDiff).toString() + "px";
+const getCardClusters = (): (ICard | IGrid)[][] => {
+  let currentlyColspans = props.value.cards[0].colspan == 2;
+  let idx = 0;
+  const cardCluster = [] as (ICard | IGrid)[][];
+  for (const card of props.value.cards) {
+    if (cardCluster.length < idx + 1) {
+      cardCluster.push([])
+    }    
+    if ((card.colspan == 2 && currentlyColspans) || (card.colspan === undefined && !currentlyColspans)) {
+      cardCluster[idx].push(card);
+    } else {
+      cardCluster.push([card]);
+      currentlyColspans = card.colspan == 2;
+      idx += 1;
     }
-  }, 3000);
+  }
+  return cardCluster;
+}
+
+useStore().watch(SETTINGS.DARKMODE, (newValue: string) => {
+    theme.global.name.value = useStore().getValueById(SETTINGS.DARKMODE, "light");
+    useUtils().reapplyTwoColumnStyling();
+});
+
+onMounted(() => {
+  useUtils().applyTwoColumnStyling();
+  // TODO: nextTick does not seem to work in production, using setTimeout as a crutch
+  setTimeout(() => {
+    useUtils().applyTwoColumnStyling();
+  }, 500)
 })
 </script>
