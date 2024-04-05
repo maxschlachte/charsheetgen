@@ -3,7 +3,7 @@ import { useMenu } from "@/services/menu.service";
 import { useStore } from "@/services/store.service";
 import { CELL_TYPES, ELEMENT_TYPES, MENU_ENTRY_TYPES, POSITIONING } from "@/types/enums";
 import { IButton, ICell, IElement, IElementText, IGrid, IInputNumber, IInputText, IMenuCheckbox, ISelect, ISheet, ITable, IText, ITextArea } from "@/types/interfaces";
-import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeHouseruleCheck, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, getBooleanValue, initializeValue } from "./utils";
+import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeHouseruleCheck, chooseModifierAndMakeHouseruleFightCheck, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, getBooleanValue, initializeValue } from "./utils";
 import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills } from "./staticData";
 import { MDI } from "./icons";
 import { getInputIds, trackAll } from "./builder";
@@ -389,7 +389,12 @@ function weaponRow(i: number){
     type: CELL_TYPES.BUTTON,
     icon: MDI.MELEE,
     action: () => {
-      chooseModifierAndMakeAttackCheck("id:weapon-name-" + id, "Probe: AT");
+      if(getBooleanValue("id:houserules")){
+        chooseModifierAndMakeHouseruleFightCheck("id:weapon-name-" + id, "Probe: AT");
+      }
+      else {
+        chooseModifierAndMakeAttackCheck("id:weapon-name-" + id, "Probe: AT");
+      }
     },
     colspan: 1
   };
@@ -398,7 +403,12 @@ function weaponRow(i: number){
     type: CELL_TYPES.BUTTON,
     icon: MDI.DEFEND,
     action: () => {
-      chooseModifierAndMakeDefenseCheck("id:weapon-name-" + id, "Probe: PA");
+      if(getBooleanValue("id:houserules")){
+        chooseModifierAndMakeHouseruleFightCheck("id:weapon-name-" + id, "Probe: PA");
+      }
+      else {
+        chooseModifierAndMakeDefenseCheck("id:weapon-name-" + id, "Probe: PA");
+      }
     },
     colspan: 1
   };

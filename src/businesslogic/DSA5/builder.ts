@@ -184,10 +184,12 @@ export const trackBE = () => {
     const weightTotal = getNumberValue("id:weight-total");
     const tk = getNumberValue("id:weight-max");
     let d = Math.floor(Math.max(0, weightTotal-tk) / 4.0);
+    let armorBE = 0;
     for(var i = 1; i <= 10; ++i){
         const id = i.toString();
-        d += getNumberValue("id:armor-BE-" + id);
+        armorBE = Math.max(armorBE, getNumberValue("id:armor-BE-" + id));
     }
+    d += armorBE;
     d = Math.max(0, Math.min(d, 4));
     const be = ["", "I", "II", "III", "IV"][d];
     updateValue("id:Belastung-name", "Belastung");

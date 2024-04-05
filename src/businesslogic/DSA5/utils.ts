@@ -50,11 +50,11 @@ function chooseModifierAndMakeCheck (makeCheck: Function, elementId: string, hea
 }
 
 // helper function: opens a dialog box to show a success/failure message
-function dialogData(headline: string, success: boolean, message: string, callback?: Function){
+function dialogData(headline: string, success: boolean | null, message: string, callback?: Function){
   const dialogDataShowMessage: IDialog = {
     headline: headline,
     icon: success ? "mdi-check-circle-outline" : "mdi-close-circle-outline",
-    color: success ? colors.green.base : colors.red.base,
+    color: (success === null ? colors.yellow.base : (success ? colors.green.base : colors.red.base)),
     text: message,
     buttons: [
       {
@@ -95,8 +95,7 @@ export const makeAttackCheckWithFixedModifier = (elementId: string, headline: st
       const currentValue = getNumberValue("id:" + ability) + propertyBonus.attack;
       const useBE = (getStringValue("id:" + ability + "-BE") != "");
       const rnd = Math.floor(Math.random() * 20) + 1;
-      const skillName = getStringValue(elementId.replace("-name-", "-fightSkill-"));
-      const fk = (skillName == "" ? false : fightSkills.filter(skill => skill.name == skillName)[0].fk);
+      const fk = fightSkills.filter(skill => skill.name == ability)[0].fk;
       const weaponModifiers = getStringValue(elementId.replace("-name-", "-modifier-"));
       const weaponModifier = (weaponModifiers == "" || fk ? 0 : Number(weaponModifiers.split("/").shift()!.trim()));
       const stateModifier = getStateModifier(useBE);
@@ -153,7 +152,10 @@ export const makeDefenseCheckWithFixedModifier = (elementId: string, headline: s
     const useBE = (getStringValue("id:" + ability + "-BE") != "");
     const rnd = Math.floor(Math.random() * 20) + 1;
     const weaponModifiers = getStringValue(elementId.replace("-name-", "-modifier-"));
-    const weaponModifier = (weaponModifiers == "" ? 0 : Number(weaponModifiers.split("/").pop()!.trim()));
+    let weaponModifier = (weaponModifiers == "" ? 0 : Number(weaponModifiers.split("/").pop()!.trim()));
+    if(ability == "Schilde"){
+      weaponModifier *= 2;
+    }
     const stateModifier = getStateModifier(useBE);
     const result = currentValue + modifier + weaponModifier - stateModifier;
     success = (rnd == 1 || (rnd <= result && !(rnd == 20)));
@@ -167,15 +169,15 @@ export const makeDefenseCheckWithFixedModifier = (elementId: string, headline: s
       Die Probe auf ${ability} war ein ${success ? "Erfolg" : "Fehlschlag"}!
     `;
     if(!success){
-      let armorProtection = 0;
+      let armorRS = 0;
       for(var i = 1; i <= 10; ++i){
         const id = i.toString();
-        armorProtection += getNumberValue("id:armor-RS-" + id);
+        armorRS = Math.max(armorRS, getNumberValue("id:armor-RS-" + id));
       }
       message = `
         ${message}
         Rüstungsschutz
-        Gesamt: ${armorProtection}
+        Gesamt: ${armorRS}
       `;
     }
   }
@@ -226,6 +228,91 @@ export const makeHouseruleCheckWithFixedModifier = (elementId: string, headline:
     Die Probe auf ${ability} war ein ${success ? "Erfolg" : "Fehlschlag"}!
     ${diff < 0 ? "Fehlende" : "Übrige"} Punkte: ${Math.abs(diff)} ${success ? "(QS " + qs + ")" : ""}
   `;
+  dialogData(headline, success, message, callback);
+}
+
+// 1d20 houserule fight check
+export const chooseModifierAndMakeHouseruleFightCheck = (elementId: string, headline: string, callback?: Function) => {
+  const ability = getStringValue(elementId.replace("-name-", "-fightSkill-"));
+  chooseModifierAndMakeCheck(makeHouseruleFightCheckWithFixedModifier, elementId, headline, ability, callback);
+}
+export const makeHouseruleFightCheckWithFixedModifier = (elementId: string, headline: string, ability: string, modifier: number, callback?: Function) => {
+  let success : boolean | null = false;
+  let message = "";
+  if(ability == ""){
+    message = `Keine Kampftechnik ausgewählt!`;
+  }
+  else {
+    const damage = getStringValue(elementId.replace("-name-", "-damage-"));
+    if(!/^\s*\d+\s*[DW]\s*\d+(\s*[\+\-]\s*\d+)*\s*$/i.test(damage)) {
+      message = `
+        Trefferpunkte: ${damage}
+        Ungültiges Format!
+      `;
+    }
+    else {
+      const mode = headline.split(" ").pop();
+      const propertyBonus = getPropertyBonus("id:" + ability);
+      const useBE = (getStringValue(elementId + "-BE") != "");
+      const currentValue = Math.round(getNumberValue("id:" + ability) / (mode == "PA" ? 2.0 : 1)) + (mode == "PA" ? propertyBonus.defense : propertyBonus.attack);
+      const rnd = Math.floor(Math.random() * 20) + 1;
+      const fk = fightSkills.filter(skill => skill.name == ability)[0].fk;
+      const weaponModifiers = getStringValue(elementId.replace("-name-", "-modifier-"));
+      let weaponModifier = (weaponModifiers == "" || fk ? 0 : Number(weaponModifiers.split("/").shift()!.trim()));
+      if(mode == "PA" && ability == "Schilde"){
+        weaponModifier *= 2;
+      }
+      const stateModifier = getStateModifier(useBE);
+      const result = currentValue + modifier + weaponModifier - stateModifier;
+      success = null;
+      if(rnd == 20){
+        success = true;
+      }
+      else if(rnd == 1){
+        success = false;
+      }
+      message = `
+        Gewürfelt: ${rnd}
+        ${mode == "PA" ? "Parade" : "Attacke"}wert: ${(currentValue >= 0 ? "+" : "-") + Math.abs(currentValue)}
+        Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
+        Waffe: ${(weaponModifier >= 0 ? "+" : "-") + Math.abs(weaponModifier)}
+        Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
+        Ergebnis: ${rnd + result}
+      `;
+      if(success == null || success){
+        const regexp = /(\d+)\s*[DW]\s*(\d+)((?:\s*[\+\-]\s*\d+)*)/i;
+        const match = damage.match(regexp);
+        const n = Number(match![1]);
+        const d = Number(match![2]);
+        const m = String(match![3]).replaceAll(" ", "");
+        const rnds = [];
+        for(var i = 0; i < n; ++i){
+          rnds.push(Math.floor(Math.random() * d) + 1);
+        }
+        const tp = rnds.reduce((sum, x) => sum + x, 0) + (m == "" ? 0 : eval(m)) + propertyBonus.damage;
+        message = `
+          ${message}
+          Trefferpunkte
+          Gewürfelt: ${rnds.map(rnd => rnd.toString()).join(", ")}
+          Modifikator: ${m}
+          Schadensbonus: +${propertyBonus.damage}
+          Ergebnis: ${tp}
+        `;
+      }
+      if(success == null || !success){
+        let armorRS = 0;
+        for(var i = 1; i <= 10; ++i){
+          const id = i.toString();
+          armorRS = Math.max(armorRS, getNumberValue("id:armor-RS-" + id));
+        }
+        message = `
+          ${message}
+          Rüstungsschutz
+          Gesamt: ${armorRS}
+        `;
+      }
+    }
+  }
   dialogData(headline, success, message, callback);
 }
 
