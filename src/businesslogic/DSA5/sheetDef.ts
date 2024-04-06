@@ -565,8 +565,8 @@ export const sheetDef: ISheet = {
             [
               {
                 name: `
-                  In den Textfeldern können AP-Kosten für die Berechnung angegeben werden (z. B. »Zauberer (25 AP)«).
-                  Dies ist nicht erforderlich für Vor- und Nachteile, die LE, AE, KE, SK, ZK oder GS verändern (z. B. »Hohe Astralkraft«).
+                  In den Textfeldern können AP-Kosten für die Berechnung angegeben werden (z. B. Zäher Hund (20 AP)«).
+                  Dies ist nicht erforderlich für Vor- und Nachteile, die LE, AE, KE, SK, ZK oder GS verändern (z. B. »Zauberer«).
                 `,
                 type: CELL_TYPES.STRING,
                 colspan: 6

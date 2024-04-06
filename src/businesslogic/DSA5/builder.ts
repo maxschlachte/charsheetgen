@@ -3,6 +3,7 @@ import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills,
 import { getNumberValue, getStringValue, updateValue } from "./utils";
 import { weaponRows } from "./sheetDef";
 import { IButton, ISelect } from "@/types/interfaces";
+import { start } from "repl";
 
 // get the IDs of all input elements
 export const getInputIds = (item: any, ids: string[] = []): string[] => {
@@ -65,7 +66,7 @@ function calcCostsXE(n: number, negativeCosts: number = 0, minPowerLevel: number
         }
         possibs.push(...calcCostsXE(n-1, negativeCosts, minPowerLevel, maxPowerLevel, maxAbilityLevel, propertyValue, purchased+1).map(x => calcCosts(purchased, purchased+1, "D") + x));
     }
-        possibs.sort(function(a, b){ return a-b; });
+    possibs.sort(function(a, b){ return a-b; });
     return possibs;
 }
 
@@ -119,11 +120,13 @@ export const trackAP = () => {
     if(current_AE > 0){
         const propertyValue = getNumberValue("id:" + getStringValue("id:Zauber-property"));
         const start_AE = current_AE - 20 - propertyValue;
+        spent_AP += 25;
         spent_AP += Math.min(...calcCostsXE(start_AE, 2, minPowerLevel, 7, 3, propertyValue));
     }
     if(current_KE > 0){
         const propertyValue = getNumberValue("id:" + getStringValue("id:Liturgie-property"));
         const start_KE = current_KE - 20 - propertyValue;
+        spent_AP += 25;
         spent_AP += Math.min(...calcCostsXE(start_KE, 2, minPowerLevel, 7, 3, propertyValue));
     }
     const start_SK = current_SK - Math.round((current_MU + current_KL + current_IN) / 6.0);
