@@ -53,7 +53,7 @@ function chooseModifierAndMakeCheck (makeCheck: Function, elementId: string, hea
 function dialogData(headline: string, success: boolean | null, message: string, callback?: Function){
   const dialogDataShowMessage: IDialog = {
     headline: headline,
-    icon: success ? "mdi-check-circle-outline" : "mdi-close-circle-outline",
+    icon: (success === null ? "" : (success ? "mdi-check-circle-outline" : "mdi-close-circle-outline")),
     color: (success === null ? colors.yellow.base : (success ? colors.green.base : colors.red.base)),
     text: message,
     buttons: [
@@ -221,7 +221,7 @@ export const makeHouseruleCheckWithFixedModifier = (elementId: string, headline:
   const qs = Math.max(1, Math.min(Math.ceil(diff/3.0), 6));
   const message = `
     Gewürfelt: ${rnd}
-    Talentwert: ${(currentValue >= 0 ? "+" : "-") + Math.abs(currentValue)}
+    Basiswert: ${(currentValue >= 0 ? "+" : "-") + Math.abs(currentValue)}
     Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
     Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
     Ergebnis: ${rnd + result}
@@ -253,7 +253,7 @@ export const makeHouseruleFightCheckWithFixedModifier = (elementId: string, head
     else {
       const mode = headline.split(" ").pop();
       const propertyBonus = getPropertyBonus("id:" + ability);
-      const useBE = (getStringValue(elementId + "-BE") != "");
+      const useBE = (getStringValue("id:" + ability + "-BE") != "");
       const currentValue = Math.round(getNumberValue("id:" + ability) / (mode == "PA" ? 2.0 : 1)) + (mode == "PA" ? propertyBonus.defense : propertyBonus.attack);
       const rnd = Math.floor(Math.random() * 20) + 1;
       const fk = fightSkills.filter(skill => skill.name == ability)[0].fk;
@@ -273,7 +273,7 @@ export const makeHouseruleFightCheckWithFixedModifier = (elementId: string, head
       }
       message = `
         Gewürfelt: ${rnd}
-        ${mode == "PA" ? "Parade" : "Attacke"}wert: ${(currentValue >= 0 ? "+" : "-") + Math.abs(currentValue)}
+        Basiswert: ${(currentValue >= 0 ? "+" : "-") + Math.abs(currentValue)}
         Zustände: -${Math.abs(stateModifier)} (${useBE ? "mit" : "ohne"} BE)
         Waffe: ${(weaponModifier >= 0 ? "+" : "-") + Math.abs(weaponModifier)}
         Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
@@ -313,6 +313,26 @@ export const makeHouseruleFightCheckWithFixedModifier = (elementId: string, head
       }
     }
   }
+  dialogData(headline, success, message, callback);
+}
+
+// initiative roll
+export const chooseModifierAndMakeInitiativeRoll = (elementId: string, headline: string, ability: string, callback?: Function) => {
+  chooseModifierAndMakeCheck(makeInitiativeRollWithFixedModifier, elementId, headline, ability, callback);
+}
+export const makeInitiativeRollWithFixedModifier = (elementId: string, headline: string, ability: string, modifier: number, callback?: Function) => {
+  const currentValue = getNumberValue(elementId);
+  const rnd = Math.floor(Math.random() * 6) + 1;
+  const currentBE = getStateValues()["Belastung"];
+  const result = rnd + currentValue - currentBE + modifier;
+  const success = null;
+  const message = `
+    Gewürfelt: ${rnd}
+    Basiswert: ${(currentValue >= 0 ? "+" : "-") + Math.abs(currentValue)}
+    Belastung: -${Math.abs(currentBE)}
+    Modifikator: ${(modifier >= 0 ? "+" : "-") + Math.abs(modifier)}
+    Ergebnis: ${result}
+  `;
   dialogData(headline, success, message, callback);
 }
 
@@ -425,8 +445,8 @@ export const changeMoneyWithFixedValue = (headline: string, sign: number, value:
   dialogData(headline, success, message, callback);
 };
 
-// get modifier caused by states, including "Schmerz", with or without "Belastung"
-function getStateModifier(includeBE: boolean){
+// get values for all states, including "Schmerz" and "Belastung"
+function getStateValues(){
   const romanNumbers: { [romanNumber: string]: number; } = {"" : 0, "I" : 1, "II" : 2, "III" : 3, "IV" : 4};
   const stateValues: { [name: string]: number; } = {};
   stateValues["Belastung"] = romanNumbers[getStringValue("id:Belastung")]
@@ -443,10 +463,19 @@ function getStateModifier(includeBE: boolean){
       stateValues[name] = value;
     }
   }
+  for(const name of Object.keys(stateValues)){
+    stateValues[name] = Math.max(0, Math.min(stateValues[name], 4));
+  }
+  return stateValues;
+}
+
+// get modifier caused by states, including "Schmerz", with or without "Belastung"
+function getStateModifier(includeBE: boolean){
+  const stateValues = getStateValues();
   let stateValueSum = 0;
   for(const name of Object.keys(stateValues)){
     if(includeBE || !(name == "Belastung")){
-      stateValueSum += Math.max(0, Math.min(stateValues[name], 4));
+      stateValueSum += stateValues[name];
     }
   }
   return Math.min(stateValueSum, 5);

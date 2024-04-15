@@ -40,36 +40,6 @@ function calcCosts(startValue: number, currentValue: number, group: string){
     return spent_AP;
 }
 
-// calculate the possible costs for "n" LE/AE/KE points
-// - "negativeCosts": negative AP for "Niedrige Astralkraft" etc.
-// - "minPowerLevel": minimum required level for "Hohe Astralkraft" etc.
-// - "maxPowerLevel": maximum possible level for "Hohe Astralkraft" etc.
-// - "maxAbilityLevel": maximum possible level for "Große Mediation" etc.
-// - "propertyValue": value of "Leiteigenschaft" for "Große Mediation" etc.
-function calcCostsXE(n: number, negativeCosts: number = 0, minPowerLevel: number = 0, maxPowerLevel: number = 7, maxAbilityLevel: number = 3, propertyValue: number = 0, purchased: number = 0){
-	const possibs: number[] = [];
-    if(n < 0){
-        possibs.push(...calcCostsXE(n+1, negativeCosts, minPowerLevel, maxPowerLevel, maxAbilityLevel, propertyValue, purchased).map(x => x - Math.abs(negativeCosts)));
-    }
-    else if(n == 0){
-        possibs.push(0);
-    }
-    else if(minPowerLevel > 0){
-        possibs.push(...calcCostsXE(n-1, negativeCosts, minPowerLevel-1, maxPowerLevel-1, maxAbilityLevel, propertyValue, purchased).map(x => 6 + x));
-    }
-    else {
-        if(maxPowerLevel > 0 && purchased == 0){
-            possibs.push(...calcCostsXE(n-1, negativeCosts, minPowerLevel, maxPowerLevel-1, maxAbilityLevel, propertyValue, purchased).map(x => 6 + x));
-        }
-        if(n >= 6 && propertyValue >= 19-2*maxAbilityLevel){
-            possibs.push(...calcCostsXE(n-6, negativeCosts, minPowerLevel, maxPowerLevel, maxAbilityLevel-1, propertyValue, purchased).map(x => 30 + x));
-        }
-        possibs.push(...calcCostsXE(n-1, negativeCosts, minPowerLevel, maxPowerLevel, maxAbilityLevel, propertyValue, purchased+1).map(x => calcCosts(purchased, purchased+1, "D") + x));
-    }
-    possibs.sort(function(a, b){ return a-b; });
-    return possibs;
-}
-
 const idsTrackFunctions: [RegExp[], Function][] = [];
 
 // calculate the spent AP
@@ -103,37 +73,20 @@ export const trackAP = () => {
             }
         }
     }
-    const current_MU = getNumberValue("id:MU");
-    const current_KL = getNumberValue("id:KL");
-    const current_IN = getNumberValue("id:IN");
-    const current_KO = getNumberValue("id:KO");
-    const current_KK = getNumberValue("id:KK");
-    const current_LE = getNumberValue("id:LE");
-    const current_AE = getNumberValue("id:AE");
-    const current_KE = getNumberValue("id:KE");
-    const current_SK = getNumberValue("id:SK");
-    const current_ZK = getNumberValue("id:ZK");
-    const current_GS = getNumberValue("id:GS");
-    const minPowerLevel = 3;
-    const start_LE = current_LE - 5 - 2 * getNumberValue("id:KO");
-    spent_AP += Math.min(...calcCostsXE(start_LE, 4, minPowerLevel, 7, 0));
-    if(current_AE > 0){
-        const propertyValue = getNumberValue("id:" + getStringValue("id:Zauber-property"));
-        const start_AE = current_AE - 20 - propertyValue;
-        spent_AP += 25;
-        spent_AP += Math.min(...calcCostsXE(start_AE, 2, minPowerLevel, 7, 3, propertyValue));
-    }
-    if(current_KE > 0){
-        const propertyValue = getNumberValue("id:" + getStringValue("id:Liturgie-property"));
-        const start_KE = current_KE - 20 - propertyValue;
-        spent_AP += 25;
-        spent_AP += Math.min(...calcCostsXE(start_KE, 2, minPowerLevel, 7, 3, propertyValue));
-    }
-    const start_SK = current_SK - Math.round((current_MU + current_KL + current_IN) / 6.0);
+    const start_LE = getNumberValue("id:GW-LE");
+    const start_SK = getNumberValue("id:GW-SK");
+    const start_ZK = getNumberValue("id:GW-ZK");
+    const start_GS = getNumberValue("id:GW-GS");
+    const bought_LE = getNumberValue("id:LE-bought");
+    const bought_AE = getNumberValue("id:AE-bought");
+    const bought_KE = getNumberValue("id:KE-bought");
+    spent_AP += (start_LE - 5) * (start_LE < 5 ? 4 : 6);
     spent_AP += (start_SK + 5) * 25;
-    const start_ZK = current_ZK - Math.round((current_KO + current_KO + current_KK) / 6.0);
     spent_AP += (start_ZK + 5) * 25;
-    spent_AP += (current_GS - 8) * (current_GS < 8 ? 4 : 8);
+    spent_AP += (start_GS - 8) * (start_GS < 8 ? 4 : 8);
+    spent_AP += calcCosts(0, bought_LE, "D");
+    spent_AP += calcCosts(0, bought_AE, "D");
+    spent_AP += calcCosts(0, bought_KE, "D");
     const regexp = /(\d+)\s*AP/gi;
     const fieldIds = ["Vorteile", "Nachteile", "Sprachen_&_Schriften", "allgemeine_Sonderfertigkeiten", "spezielle_Sonderfertigkeiten"];
     for(const id of fieldIds){
@@ -196,7 +149,7 @@ export const trackBE = () => {
     d = Math.max(0, Math.min(d, 4));
     const be = ["", "I", "II", "III", "IV"][d];
     updateValue("id:Belastung-name", "Belastung");
-    updateValue("id:Belastung-", be);
+    updateValue("id:Belastung", be);
 };
 const idsTrackBE = [/id:armor-BE-\d+/, /id:weight-(max|total)/];
 idsTrackFunctions.push([idsTrackBE, trackBE]);
@@ -210,30 +163,6 @@ export const trackINI = () => {
 };
 const idsTrackINI = [/id:GE/, /id:MU/];
 idsTrackFunctions.push([idsTrackINI, trackINI]);
-
-// add tooltips with formulas to some fields
-export const trackLabels = () => {
-    const AE_property = getStringValue("id:Zauber-property");
-    const KE_property = getStringValue("id:Liturgie-property");
-    const formulas: { [label: string]: string; } = {
-        "LE" : "GW + 2 × KO ± Mod.", 
-        "AE" : "ggf. 20 + " + (AE_property == "" ? "LeitEig." : AE_property) + " ± Mod.", 
-        "KE" : "ggf. 20 + " + (KE_property == "" ? "LeitEig." : KE_property) + " ± Mod.", 
-        "SK" : "GW + (MU + KL + IN) / 6 ± Mod.", 
-        "ZK" : "GW + (KO + KO + KK) / 6 ± Mod.",
-    };
-    const labels = document.getElementsByClassName("v-field-label--floating");
-    const info_sign = " 🛈";
-    for(var i = 0; i < labels.length; ++i){
-        const label = labels[i].innerHTML.replace(/<[^>]*>?/gm, '').trim().replace(info_sign, "");
-        if(Object.keys(formulas).includes(label)){
-            labels[i].innerHTML = label + info_sign;
-            labels[i].parentElement!.parentElement!.parentElement!.title = formulas[label];
-        }
-    }
-};
-const idsTrackLabels = [/id:[^-]+/, /id:(Liturgie|Zauber)-property/];
-idsTrackFunctions.push([idsTrackLabels, trackLabels]);
 
 // calculate the "Schmerz" level
 export const trackSchmerz = () => {

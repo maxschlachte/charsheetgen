@@ -3,7 +3,7 @@ import { useMenu } from "@/services/menu.service";
 import { useStore } from "@/services/store.service";
 import { CELL_TYPES, ELEMENT_TYPES, MENU_ENTRY_TYPES, POSITIONING } from "@/types/enums";
 import { IButton, ICell, IElement, IElementText, IGrid, IInputNumber, IInputText, IMenuCheckbox, ISelect, ISheet, ITable, IText, ITextArea } from "@/types/interfaces";
-import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeHouseruleCheck, chooseModifierAndMakeHouseruleFightCheck, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, getBooleanValue, initializeValue } from "./utils";
+import { chooseModifierAndMakeAttackCheck, chooseModifierAndMakeDefenseCheck, chooseModifierAndMakeHealingRoll, chooseModifierAndMakeHouseruleCheck, chooseModifierAndMakeHouseruleFightCheck, chooseModifierAndMakeInitiativeRoll, chooseModifierAndMakeSimpleCheck, chooseModifierAndMakeTripleCheck, chooseValueAndChangeMoney, getBooleanValue, initializeValue } from "./utils";
 import { physicalSkills, socialSkills, natureSkills, scienceSkills, craftSkills, fightSkills } from "./staticData";
 import { MDI } from "./icons";
 import { getInputIds, trackAll } from "./builder";
@@ -18,9 +18,21 @@ function textField(name: string, colspan: number = 1){
   };
 }
 
-function propertyField(id: string, readonly: boolean = false, colspan: number = 1){
+function propertyBuyin(id: string, readonly: boolean = false, colspan: number = 1){
+  const idWithoutSpaces = id.replaceAll(" ", "-");
   return {
-    id: "id:" + id,
+    id: "id:" + idWithoutSpaces + "-bought",
+    name: "Zukauf " + id,
+    type: CELL_TYPES.INPUT_NUMBER,
+    readonly: readonly,
+    colspan: colspan
+  };
+}
+
+function propertyField(id: string, readonly: boolean = false, colspan: number = 1){
+  const idWithoutSpaces = id.replaceAll(" ", "-");
+  return {
+    id: "id:" + idWithoutSpaces,
     name: id,
     type: CELL_TYPES.INPUT_NUMBER,
     readonly: readonly,
@@ -29,6 +41,7 @@ function propertyField(id: string, readonly: boolean = false, colspan: number = 
 }
 
 function propertyCheck(id: string){
+  const idWithoutSpaces = id.replaceAll(" ", "-");
   return {
     name: "Probe: " + id,
     type: CELL_TYPES.BUTTON,
@@ -36,23 +49,24 @@ function propertyCheck(id: string){
     icon: "mdi-dice-d20-outline",
     action: () => {
       if(getBooleanValue("id:houserules")){
-        chooseModifierAndMakeHouseruleCheck("id:" + id, "Probe: " + id, id);
+        chooseModifierAndMakeHouseruleCheck("id:" + idWithoutSpaces, "Probe: " + id, idWithoutSpaces);
       }
       else {
-        chooseModifierAndMakeSimpleCheck("id:" + id, "Probe: " + id, id);
+        chooseModifierAndMakeSimpleCheck("id:" + idWithoutSpaces, "Probe: " + id, idWithoutSpaces);
       }
     }
   };
 }
 
 function propertyRegen(id: string){
+  const idWithoutSpaces = id.replaceAll(" ", "-");
   return {
     name: "Regeneration: " + id,
     type: CELL_TYPES.BUTTON,
     colspan: 1,
     icon: MDI.HEAL,
     action: () => {
-      chooseModifierAndMakeHealingRoll("id:" + id, "Regeneration: " + id, id);
+      chooseModifierAndMakeHealingRoll("id:" + idWithoutSpaces, "Regeneration: " + id, idWithoutSpaces);
     }
   };
 }
@@ -481,40 +495,47 @@ export const sheetDef: ISheet = {
               propertyCheck("MU"),
               {
                 id: "id:AP-total",
-                name: "AP (gesamt)",
+                name: "AP gesamt",
                 type: CELL_TYPES.INPUT_NUMBER,
-                colspan: 4
+                colspan: 2
+              },
+              {
+                id: "id:AP-spent",
+                name: "AP ausgegeben",
+                type: CELL_TYPES.INPUT_NUMBER,
+                readonly: true,
+                colspan: 2
               },
             ],
             [
               propertyField("KL"),
               propertyCheck("KL"),
-              {
-                id: "id:AP-spent",
-                name: "AP (ausgegeben)",
-                type: CELL_TYPES.INPUT_NUMBER,
-                readonly: true,
-                colspan: 4
-              },
+              propertyField("GW LE"),
+              propertyField("GW SK"),
+              propertyField("GW ZK"),
+              propertyField("GW GS"),
             ],
             [
               propertyField("IN"),
               propertyCheck("IN"),
-              propertyField("LE", false, 2),
+              propertyBuyin("LE"),
+              propertyField("LE"),
               propertyField("LeP"),
               propertyRegen("LeP"),
             ],
             [
               propertyField("CH"),
               propertyCheck("CH"),
-              propertyField("AE", false, 2),
+              propertyBuyin("AE"),
+              propertyField("AE"),
               propertyField("AeP"),
               propertyRegen("AeP"),
             ],
             [
               propertyField("FF"),
               propertyCheck("FF"),
-              propertyField("KE", false, 2),
+              propertyBuyin("KE"),
+              propertyField("KE"),
               propertyField("KeP"),
               propertyRegen("KeP"),
             ],
@@ -527,8 +548,16 @@ export const sheetDef: ISheet = {
                 type: CELL_TYPES.INPUT_NUMBER,
                 colspan: 2
               },
-              propertyField("AW", true),
-              propertyCheck("AW"),
+              propertyField("INI", true),
+              {
+                name: "Probe: INI",
+                type: CELL_TYPES.BUTTON,
+                colspan: 1,
+                icon: "mdi-flash-outline",
+                action: () => {
+                  chooseModifierAndMakeInitiativeRoll("id:INI", "Probe: INI", "INI");
+                }
+              },
             ],
             [
               propertyField("KO"),
@@ -539,8 +568,8 @@ export const sheetDef: ISheet = {
                 type: CELL_TYPES.INPUT_NUMBER,
                 colspan: 2
               },
-              propertyField("INI", true),
-              propertyCheck("INI"),
+              propertyField("AW", true),
+              propertyCheck("AW"),
             ],
             [
               propertyField("KK"),
@@ -561,17 +590,6 @@ export const sheetDef: ISheet = {
             stateRow(2),
             stateRow(3),
             stateRow(4),
-            emptyLine,
-            [
-              {
-                name: `
-                  In den Textfeldern können AP-Kosten für die Berechnung angegeben werden (z. B. »Zäher Hund (20 AP)«).
-                  Dies ist nicht erforderlich für Vor- und Nachteile, die LE, AE, KE, SK, ZK oder GS verändern (z. B. »Zauberer«).
-                `,
-                type: CELL_TYPES.STRING,
-                colspan: 6
-              },
-            ],
             emptyLine,
             [
               {
@@ -850,6 +868,10 @@ for(const property of ["MU", "KL", "IN", "CH", "FF", "GE", "KO", "KK"]){
 }
 
 // initialise other stats
+initializeValue("id:GW-LE", 5);
+initializeValue("id:GW-SK", -5);
+initializeValue("id:GW-ZK", -5);
+initializeValue("id:GW-GS", 8);
 initializeValue("id:LE", 21);
 initializeValue("id:SK", -1);
 initializeValue("id:ZK", -1);
