@@ -222,7 +222,7 @@ function magicTable(name: string){
     const costsCell: ICell = {
       id: "id:" + prefix + "-costs-" + id,
       name: "",
-      type: CELL_TYPES.INPUT_NUMBER
+      type: CELL_TYPES.INPUT_STRING
     };
     const timeCell: ICell = {
       id: "id:" + prefix + "-time-" + id,

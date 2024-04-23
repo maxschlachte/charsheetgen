@@ -197,22 +197,24 @@ export const trackSpells = () => {
         for(var i = 1; i <= 40; ++i){
             const id = i.toString();
             const spellName = getStringValue("id:" + prefix + "-name-" + id).trim();
+            const spellCosts = getStringValue("id:" + prefix + "-costs-" + id).trim();
             const spellTime = getStringValue("id:" + prefix + "-time-" + id).trim();
             const spellDistance = getStringValue("id:" + prefix + "-distance-" + id).trim();
             const spellDuration = getStringValue("id:" + prefix + "-duration-" + id).trim();
             const spellProperties = getStringValue("id:" + prefix + "-properties-" + id).trim();
             const spellGroup = getStringValue("id:" + prefix + "-group-" + id);
             const spellValue = getNumberValue("id:" + prefix + "-" + id);
-            if(spellValue > 0 || !(spellName + spellTime + spellDistance + spellDuration + spellProperties + spellGroup == "")){
-                spells.push({name : spellName, time : spellTime, distance : spellDistance, duration : spellDuration, properties : spellProperties, group : spellGroup, value : spellValue});
+            if(spellValue > 0 || !(spellName + spellCosts + spellTime + spellDistance + spellDuration + spellProperties + spellGroup == "")){
+                spells.push({name : spellName, costs :  spellCosts, time : spellTime, distance : spellDistance, duration : spellDuration, properties : spellProperties, group : spellGroup, value : spellValue});
             }
         }
         spells.sort(function(spell1, spell2){ return spell1.name.localeCompare(spell2.name); });
         const spells_length = spells.length;
         for(var i = 1; i <= 40; ++i){
             const id = i.toString();
-            const spell = (spells.length > 0 ? spells.shift() : {name : "", time : "", distance : "", duration : "", properties : "", group : "", value : ""});
+            const spell = (spells.length > 0 ? spells.shift() : {name : "", costs : "", time : "", distance : "", duration : "", properties : "", group : "", value : ""});
             updateValue("id:" + prefix + "-name-" + id, (spell as any).name);
+            updateValue("id:" + prefix + "-costs-" + id, (spell as any).costs);
             updateValue("id:" + prefix + "-time-" + id, (spell as any).time);
             updateValue("id:" + prefix + "-distance-" + id, (spell as any).distance);
             updateValue("id:" + prefix + "-duration-" + id, (spell as any).duration);
