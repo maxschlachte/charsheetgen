@@ -65,22 +65,6 @@
             </div>
           </div>
         </div>
-        <div class="grid grid-cols-1 gap-4">
-          <div>
-            <div v-for="(card, index) in getCards().filter((crd, idx) => crd.colspan == 2)"
-              :class="`${'mt-4'}`"
-            >
-              <Card
-                v-if="isCard(card)"
-                :value="card"
-              />
-              <Grid
-                v-if="isGrid(card)"
-                :value="card"
-              />
-            </div>
-          </div>
-        </div>
       </div>
     </div>
     <v-dialog
