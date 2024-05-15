@@ -192,7 +192,7 @@ export const makeHealingRollWithFixedModifier = (elementId: string, headline: st
   const currentValue = getNumberValue(elementId);
   const maxValue = getNumberValue(elementId.replace("eP", "E"));
   const rnd = Math.floor(Math.random() * 6) + 1;
-  const result = rnd + modifier;
+  const result = Math.max(0, rnd + modifier);
   const newValue = Math.min(currentValue + result, maxValue);
   const success = newValue >= currentValue;
   const message = `
