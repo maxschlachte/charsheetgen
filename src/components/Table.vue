@@ -1,5 +1,5 @@
 <template>
-  <table class="table-auto">
+  <table class="table-fixed w-full">
     <thead v-if="getTable().column !== undefined">
       <tr>
         <th

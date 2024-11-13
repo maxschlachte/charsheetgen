@@ -33,6 +33,7 @@
                 no-resize
                 flat
                 variant="outlined"
+                spellcheck="false"
                 @change="(event: Event) => setModelValue(cell, event)"
             ></v-textarea>
             <Table
